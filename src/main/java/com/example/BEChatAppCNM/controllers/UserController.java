@@ -11,31 +11,38 @@ import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
 @RestController
-@RequestMapping("/user")
 public class UserController {
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
+
+    @CrossOrigin(origins = {"http://10.0.2.2:8080"})
     @PostMapping("/register")
     public ResponseEntity register(@RequestBody User user) throws ExecutionException, InterruptedException {
         String result = userService.saveUser(user);
         return new ResponseEntity<>(result, HttpStatus.ACCEPTED);
     }
 
-    @PostMapping("/signin")
-    public ResponseEntity signIn(@RequestBody User user) throws ExecutionException, InterruptedException {
-        boolean result = userService.checkAccountSignIn(user);
+    @CrossOrigin(origins = {"http://10.0.2.2:8080"})
+    @PostMapping("/login")
+    public ResponseEntity login(@RequestBody User user) throws ExecutionException, InterruptedException {
+        String result = userService.checkAccountSignIn(user);
         return new ResponseEntity<>(result, HttpStatus.ACCEPTED);
     }
 
-    @GetMapping("/{phone}")
+    @CrossOrigin(origins = {"http://10.0.2.2:8080"})
+    @GetMapping("user/{phone}")
     public ResponseEntity checkExistPhone(@PathVariable String phone) throws ExecutionException, InterruptedException {
         boolean result = userService.checkExistPhoneNumber(phone);
         return new ResponseEntity<>(result, HttpStatus.ACCEPTED);
     }
-    @GetMapping("/details/{phone}")
+
+    @CrossOrigin(origins = {"http://10.0.2.2:8080"})
+    @GetMapping("user/details/{phone}")
     public ResponseEntity getUserDetails(@PathVariable String phone) throws ExecutionException, InterruptedException {
-        Optional<User> result = userService.getUserDetails(phone);
+        Optional<User> result = userService.getUserDetailsByPhone(phone);
         return new ResponseEntity<>(result, HttpStatus.ACCEPTED);
     }
 }
