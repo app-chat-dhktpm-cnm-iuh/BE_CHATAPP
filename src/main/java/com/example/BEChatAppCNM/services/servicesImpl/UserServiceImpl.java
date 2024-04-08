@@ -1,5 +1,7 @@
 package com.example.BEChatAppCNM.services.servicesImpl;
 
+import com.example.BEChatAppCNM.config.dto.FriendRequest;
+import com.example.BEChatAppCNM.entities.Friend;
 import com.example.BEChatAppCNM.entities.Role;
 import com.example.BEChatAppCNM.entities.User;
 import com.example.BEChatAppCNM.services.UserService;
@@ -28,6 +30,8 @@ public class UserServiceImpl implements UserService {
 
     private final AuthenticationManager authenticationManager;
 
+    Firestore db = FirestoreClient.getFirestore();
+
     public UserServiceImpl(PasswordEncoder passwordEncoder, JwtService jwtService, AuthenticationManager authenticationManager) {
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
@@ -54,7 +58,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Optional<User> getUserDetailsByPhone(String phone_number) throws ExecutionException, InterruptedException {
-        Firestore db = FirestoreClient.getFirestore();
 
         CollectionReference documentReference = db.collection(COLLECTION_NAME);
 
@@ -68,21 +71,54 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void updateUserDetails(User user) {
-        Firestore firestore = FirestoreClient.getFirestore();
-
-        firestore.collection(COLLECTION_NAME)
+        db.collection(COLLECTION_NAME)
                 .document(user.getPhone())
                 .create(user);
     }
 
     @Override
+    public void updateStatusUser(boolean status, String phone) throws ExecutionException, InterruptedException {
+
+        String documentId = getDocumentIdsByFieldValue(phone);
+        db.collection(COLLECTION_NAME).document(documentId).update("_activated", status);
+    }
+
+    @Override
+    public void addFriend(FriendRequest friendRequest) throws ExecutionException, InterruptedException {
+        String documentIdSender = getDocumentIdsByFieldValue(friendRequest.getSender_phone());
+        String documentIdReceiver = getDocumentIdsByFieldValue(friendRequest.getReceiver_phone());
+
+        Friend senderFriend = Friend.builder()
+                .phone_user(friendRequest.getReceiver_phone())
+                .is_blocked(false)
+                .build();
+
+        Friend receiverFriend = Friend.builder()
+                .phone_user(friendRequest.getSender_phone())
+                .is_blocked(false)
+                .build();
+
+        db.collection(COLLECTION_NAME).document(documentIdSender).update("friends_list", FieldValue.arrayUnion(senderFriend));
+        db.collection(COLLECTION_NAME).document(documentIdReceiver).update("friends_list", FieldValue.arrayUnion(receiverFriend));
+    }
+
+    public String getDocumentIdsByFieldValue( Object value) throws ExecutionException, InterruptedException {
+        CollectionReference collectionReference = db.collection(COLLECTION_NAME);
+
+        ApiFuture<QuerySnapshot> future = collectionReference.whereEqualTo("phone", value).get();
+        List<QueryDocumentSnapshot> documents = future.get().getDocuments();
+        QueryDocumentSnapshot documentSnapshot = documents.get(0);
+        String documentId = documentSnapshot.getId();
+
+        return documentId;
+    }
+
+    @Override
     public boolean checkExistPhoneNumber(String phone_number) throws ExecutionException, InterruptedException {
-        Firestore db = FirestoreClient.getFirestore();
         CollectionReference collectionReference = db.collection(COLLECTION_NAME);
 
         ApiFuture<QuerySnapshot> future = collectionReference.whereEqualTo("phone", phone_number).get();
         List<QueryDocumentSnapshot> documents = future.get().getDocuments();
-
 
         if(!documents.isEmpty()) {
             return true;
@@ -91,17 +127,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public String checkAccountSignIn(User user) throws ExecutionException, InterruptedException {
-        Firestore db = FirestoreClient.getFirestore();
         CollectionReference collectionReference = db.collection(COLLECTION_NAME);
-        try {
             Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
 
             User userTemp = getUserDetailsByPhone(user.getPhone()).orElseThrow();
             return jwtService.generateToken(userTemp);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "Lỗi đăng nhập không thành công";
-        }
-
     }
 }

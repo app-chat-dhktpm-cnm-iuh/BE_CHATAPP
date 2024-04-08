@@ -8,6 +8,6 @@ import lombok.*;
 @Builder
 @ToString
 public class Friend {
-    private String user_id;
+    private String phone_user;
     private boolean is_blocked;
 }

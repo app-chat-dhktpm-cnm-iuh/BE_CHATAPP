@@ -39,9 +39,9 @@ public class JwtSecurityConfig {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(
-                        req->req.requestMatchers("/login/**","/register/**")
+                        req->req.requestMatchers("/login/**","/register/**", "/user/**")
                                 .permitAll()
-                                .requestMatchers("/user/**").hasAuthority("USER")
+                                .requestMatchers("/users/**").hasAuthority("USER")
                                 .anyRequest()
                                 .authenticated()
                 ).userDetailsService(userDetailsServiceImpl)
