@@ -63,6 +63,12 @@ public class UserController {
         return new ResponseEntity<>(result, HttpStatus.ACCEPTED);
     }
 
+    @MessageMapping("/message")
+    @SendTo("/user/messages")
+    public String testConnect(String message) {
+        return "Received: " + message;
+    }
+
     @MessageMapping("/user.userOnline")
     @SendTo("/user/public")
     public User userOnline(@Payload User user) throws ExecutionException, InterruptedException {
