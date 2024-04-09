@@ -1,4 +1,4 @@
-package com.example.BEChatAppCNM.config.dto;
+package com.example.BEChatAppCNM.entities.dto;
 
 import lombok.*;
 

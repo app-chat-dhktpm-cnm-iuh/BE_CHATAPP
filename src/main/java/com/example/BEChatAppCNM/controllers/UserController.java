@@ -1,11 +1,13 @@
 package com.example.BEChatAppCNM.controllers;
 
-import com.example.BEChatAppCNM.config.dto.FriendRequest;
-import com.example.BEChatAppCNM.entities.Friend;
+import com.example.BEChatAppCNM.entities.dto.FriendRequest;
+import com.example.BEChatAppCNM.entities.dto.MessageRequest;
+import com.example.BEChatAppCNM.entities.Conversation;
 import com.example.BEChatAppCNM.entities.User;
+import com.example.BEChatAppCNM.services.ChatService;
+import com.example.BEChatAppCNM.services.ConversationService;
 import com.example.BEChatAppCNM.services.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -14,6 +16,7 @@ import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
@@ -23,6 +26,8 @@ public class UserController {
     private final UserService userService;
 
     private final SimpMessagingTemplate messagingTemplate;
+
+
 
     @CrossOrigin(origins = {"http://10.0.2.2:8080"})
     @PostMapping("/register")
@@ -60,6 +65,7 @@ public class UserController {
     @MessageMapping("/user.userOnline")
     @SendTo("/user/public")
     public User userOnline(@Payload User user) throws ExecutionException, InterruptedException {
+        System.out.println(user.toString());
         userService.updateStatusUser(true, user.getPhone());
         return user;
     }
@@ -84,4 +90,5 @@ public class UserController {
             return friendRequest;
         } else return friendRequest;
     }
+
 }

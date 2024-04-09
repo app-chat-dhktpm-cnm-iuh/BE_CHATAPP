@@ -1,6 +1,6 @@
 package com.example.BEChatAppCNM.services;
 
-import com.example.BEChatAppCNM.config.dto.FriendRequest;
+import com.example.BEChatAppCNM.entities.dto.FriendRequest;
 import com.example.BEChatAppCNM.entities.User;
 
 import java.util.Optional;

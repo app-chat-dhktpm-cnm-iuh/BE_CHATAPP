@@ -11,12 +11,9 @@ import java.util.List;
 @Builder
 @ToString
 public class Message {
-    private String mess_id;
-    private String sender_id;
-    private String receiver_id;
+    private String sender_phone;
     private String content;
     private List<String> attaches;
     private Date sent_date_time;
-    private Date received_date_time;
     private boolean is_deleted;
 }

@@ -1,6 +1,6 @@
 package com.example.BEChatAppCNM.services.servicesImpl;
 
-import com.example.BEChatAppCNM.config.dto.FriendRequest;
+import com.example.BEChatAppCNM.entities.dto.FriendRequest;
 import com.example.BEChatAppCNM.entities.Friend;
 import com.example.BEChatAppCNM.entities.Role;
 import com.example.BEChatAppCNM.entities.User;
@@ -14,9 +14,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
@@ -47,9 +45,7 @@ public class UserServiceImpl implements UserService {
                 .role(Role.valueOf("USER"))
                 .build();
 
-        Firestore firestore = FirestoreClient.getFirestore();
-
-       firestore.collection(COLLECTION_NAME)
+       db.collection(COLLECTION_NAME)
                 .document()
                 .create(userTemp);
        String token = jwtService.generateToken(userTemp);

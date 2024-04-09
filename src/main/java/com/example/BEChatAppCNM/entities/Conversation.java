@@ -9,10 +9,11 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @ToString
-public class Conservation {
+public class Conversation {
+    private String conversation_id;
     private String title;
     private String creator_phone;
-    private String ava_conservation_url;
+    private String ava_conversation_url;
     private boolean is_deleted;
     private List<String> members;
     private List<Message> messages;
