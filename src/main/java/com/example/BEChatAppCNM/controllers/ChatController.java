@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -38,6 +39,7 @@ public class ChatController {
         return conversationResult;
     }
 
+    @CrossOrigin("http://localhost:5173")
     @GetMapping("user/messages/{creator_phone}")
     public ResponseEntity findListConversation(@PathVariable String creator_phone) throws ExecutionException, InterruptedException {
         List<Conversation> conversationList = conversationService.findListConversationByCreatorPhone(creator_phone);

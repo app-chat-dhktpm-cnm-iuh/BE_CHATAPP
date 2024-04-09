@@ -36,7 +36,7 @@ public class UserController {
         return new ResponseEntity<>(result, HttpStatus.ACCEPTED);
     }
 
-    @CrossOrigin(origins = {"http://10.0.2.2:8080"})
+    @CrossOrigin(origins = {"http://10.0.2.2:8080", "http://localhost:5173"})
     @PostMapping("/login")
     public ResponseEntity login(@RequestBody User user) throws ExecutionException, InterruptedException {
         try {
@@ -48,14 +48,14 @@ public class UserController {
         return new ResponseEntity("Lỗi không đăng nhập được", HttpStatus.UNAUTHORIZED);
     }   
 
-    @CrossOrigin(origins = {"http://10.0.2.2:8080"})
+    @CrossOrigin(origins = {"http://10.0.2.2:8080", "http://localhost:5173"})
     @GetMapping("user/{phone}")
     public ResponseEntity checkExistPhone(@PathVariable String phone) throws ExecutionException, InterruptedException {
         boolean result = userService.checkExistPhoneNumber(phone);
         return new ResponseEntity<>(result, HttpStatus.ACCEPTED);
     }
 
-    @CrossOrigin(origins = {"http://10.0.2.2:8080"})
+    @CrossOrigin(origins = {"http://10.0.2.2:8080", "http://localhost:5173"})
     @GetMapping("user/details/{phone}")
     public ResponseEntity getUserDetails(@PathVariable String phone) throws ExecutionException, InterruptedException {
         Optional<User> result = userService.getUserDetailsByPhone(phone);
