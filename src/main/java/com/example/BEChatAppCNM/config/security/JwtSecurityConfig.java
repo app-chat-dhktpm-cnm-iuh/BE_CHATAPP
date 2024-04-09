@@ -39,7 +39,7 @@ public class JwtSecurityConfig {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(
-                        req->req.requestMatchers("/login/**","/register/**", "/user/**")
+                        req->req.requestMatchers("/login/**","/register/**", "/user/**", "/websocket/**")
                                 .permitAll()
                                 .requestMatchers("/users/**").hasAuthority("USER")
                                 .anyRequest()
