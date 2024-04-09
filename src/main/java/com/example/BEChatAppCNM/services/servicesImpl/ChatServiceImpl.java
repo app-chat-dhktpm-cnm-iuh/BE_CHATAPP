@@ -6,7 +6,9 @@ import com.example.BEChatAppCNM.services.ChatService;
 import com.google.cloud.firestore.CollectionReference;
 import com.google.cloud.firestore.Firestore;
 import com.google.firebase.cloud.FirestoreClient;
+import org.springframework.stereotype.Service;
 
+@Service
 public class ChatServiceImpl implements ChatService {
 
     private static final String COLLECTION_NAME = "conversations";

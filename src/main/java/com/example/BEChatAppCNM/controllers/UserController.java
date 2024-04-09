@@ -23,6 +23,7 @@ import java.util.concurrent.ExecutionException;
 @RestController
 @RequiredArgsConstructor
 public class UserController {
+
     private final UserService userService;
 
     private final SimpMessagingTemplate messagingTemplate;
