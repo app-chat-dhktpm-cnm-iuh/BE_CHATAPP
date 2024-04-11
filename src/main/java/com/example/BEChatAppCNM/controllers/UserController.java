@@ -1,5 +1,6 @@
 package com.example.BEChatAppCNM.controllers;
 
+import com.example.BEChatAppCNM.entities.Role;
 import com.example.BEChatAppCNM.entities.dto.FriendRequest;
 import com.example.BEChatAppCNM.entities.dto.MessageRequest;
 import com.example.BEChatAppCNM.entities.Conversation;
@@ -7,6 +8,8 @@ import com.example.BEChatAppCNM.entities.User;
 import com.example.BEChatAppCNM.services.ChatService;
 import com.example.BEChatAppCNM.services.ConversationService;
 import com.example.BEChatAppCNM.services.UserService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +17,7 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.util.SerializationUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -65,33 +69,38 @@ public class UserController {
 
     @MessageMapping("/message")
     @SendTo("/user/messages")
-    public String testConnect(String message) {
-        return "Received: " + message;
+    public User testConnect(String message) {
+        User user = User.builder().phone("090988967").role(Role.USER).build();
+        return user;
     }
 
     @MessageMapping("/user.userOnline")
     @SendTo("/user/public")
-    public User userOnline(@Payload User user) throws ExecutionException, InterruptedException {
-        System.out.println(user.toString());
-        userService.updateStatusUser(true, user.getPhone());
+    public User userOnline(User user) throws ExecutionException, InterruptedException {
+        user.set_activated(true);
+
+        userService.updateStatusUser(user.is_activated(), user.getPhone());
+
         return user;
     }
 
     @MessageMapping("/user.disconnectUser")
     @SendTo("/user/public")
-    public User disconnectUser(@Payload User user) throws ExecutionException, InterruptedException {
-        userService.updateStatusUser(false, user.getPhone());
+    public User disconnectUser(User user) throws ExecutionException, InterruptedException {
+        user.set_activated(false);
+        userService.updateStatusUser(user.is_activated(), user.getPhone());
+
         return user;
     }
 
     @MessageMapping("/friend")
-    public void sendFriendRequestNotification(@Payload FriendRequest friendRequest) {
+    public void sendFriendRequestNotification(FriendRequest friendRequest) {
         messagingTemplate.convertAndSendToUser(friendRequest.getReceiver_phone(), "/queue/friends", friendRequest);
     }
 
     @MessageMapping("/user.replyFriendRequest")
     @SendTo("/user/friendNoti")
-    public  FriendRequest replyFriendRequest(@Payload FriendRequest friendRequest) throws ExecutionException, InterruptedException {
+    public  FriendRequest replyFriendRequest(FriendRequest friendRequest) throws ExecutionException, InterruptedException {
         if(friendRequest.isAceppted()) {
             userService.addFriend(friendRequest);
             return friendRequest;

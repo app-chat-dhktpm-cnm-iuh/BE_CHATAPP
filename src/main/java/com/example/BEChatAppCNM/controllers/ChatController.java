@@ -28,7 +28,7 @@ public class ChatController {
     private final SimpMessagingTemplate messagingTemplate;
 
     @MessageMapping("/user.creatConversation")
-    public Conversation createConversation(@Payload Conversation conversation) {
+    public Conversation createConversation(Conversation conversation) {
 
         Conversation conversationResult = conversationService.addConversation(conversation);
 
@@ -49,7 +49,7 @@ public class ChatController {
     }
 
     @MessageMapping("/chat")
-    public MessageRequest saveMessage(@Payload MessageRequest messageRequest) {
+    public MessageRequest saveMessage(MessageRequest messageRequest) {
         chatService.saveMessage(messageRequest);
         messageRequest.getMembers().forEach(members -> {
             messagingTemplate.convertAndSendToUser(members, "/queue/messages", messageRequest);

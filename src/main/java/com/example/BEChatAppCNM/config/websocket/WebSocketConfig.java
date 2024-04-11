@@ -16,7 +16,6 @@ import java.util.List;
 
 @Configuration
 @EnableWebSocketMessageBroker
-@EnableWebSocket
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
@@ -30,7 +29,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/websocket");
         registry.addEndpoint("/websocket")
-                .setAllowedOrigins("*").withSockJS();
+                .setAllowedOriginPatterns("*").withSockJS();
     }
 
     @Override

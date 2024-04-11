@@ -76,6 +76,7 @@ public class UserServiceImpl implements UserService {
     public void updateStatusUser(boolean status, String phone) throws ExecutionException, InterruptedException {
 
         String documentId = getDocumentIdsByFieldValue(phone);
+        System.out.println("document id: " + documentId);
         db.collection(COLLECTION_NAME).document(documentId).update("_activated", status);
     }
 
