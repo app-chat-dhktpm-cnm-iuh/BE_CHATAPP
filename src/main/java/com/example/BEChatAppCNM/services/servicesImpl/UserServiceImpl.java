@@ -16,6 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -78,7 +79,7 @@ public class UserServiceImpl implements UserService {
     public void updateUserDetails(User user) {
         db.collection(COLLECTION_NAME)
                 .document(user.getUser_id())
-                .create(user);
+                .set(user);
     }
 
     @Override
