@@ -47,12 +47,12 @@ public class UserServiceImpl implements UserService {
                 .role(Role.valueOf("USER"))
                 .build();
 
-       db.collection(COLLECTION_NAME)
-                .document()
-                .create(userTemp);
-       User userResponse = getUserDetailsByPhone(user.getPhone()).orElseThrow();
+        CollectionReference collectionReference = db.collection(COLLECTION_NAME);
+        String documentId = collectionReference.getId();
+        userTemp.setUser_id(documentId);
+        collectionReference.document(documentId).create(userTemp);
 
-       String token = jwtService.generateToken(userTemp);
+        String token = jwtService.generateToken(userTemp);
 
        LoginRegisterResponse response = LoginRegisterResponse
                .builder()
@@ -69,9 +69,6 @@ public class UserServiceImpl implements UserService {
         ApiFuture<QuerySnapshot> snapshotApiFuture = documentReference.whereEqualTo("phone", phone_number).get();
         List<User> userList = snapshotApiFuture.get().toObjects(User.class);
         Optional<User> users = userList.stream().findFirst();
-        users.ifPresent(user1 -> {
-
-        });
         if(!users.isEmpty()) {
             return users;
         } else return null;
@@ -80,7 +77,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void updateUserDetails(User user) {
         db.collection(COLLECTION_NAME)
-                .document(user.getPhone())
+                .document(user.getUser_id())
                 .create(user);
     }
 
@@ -109,6 +106,14 @@ public class UserServiceImpl implements UserService {
 
         db.collection(COLLECTION_NAME).document(documentIdSender).update("friends_list", FieldValue.arrayUnion(senderFriend));
         db.collection(COLLECTION_NAME).document(documentIdReceiver).update("friends_list", FieldValue.arrayUnion(receiverFriend));
+    }
+
+    @Override
+    public List<User> getAllUserOnline() throws ExecutionException, InterruptedException {
+        CollectionReference collectionReference = db.collection(COLLECTION_NAME);
+        ApiFuture<QuerySnapshot> future = collectionReference.whereEqualTo("_activated", true).get();
+        List<User> userList = future.get().toObjects(User.class);
+        return userList;
     }
 
     public String getDocumentIdsByFieldValue( Object value) throws ExecutionException, InterruptedException {

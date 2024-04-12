@@ -13,6 +13,7 @@ import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
@@ -57,6 +58,20 @@ public class UserController {
     }
 
     @CrossOrigin(origins = {"http://10.0.2.2:8080", "http://localhost:5173"})
+    @GetMapping("user/users-online")
+    public ResponseEntity getAllUserOnline() throws ExecutionException, InterruptedException {
+        try {
+            List<User> result = userService.getAllUserOnline();
+            if(result.size() != 0) {
+                return new ResponseEntity<>(result, HttpStatus.ACCEPTED);
+            } else return new ResponseEntity("Không user nào online", HttpStatus.NOT_FOUND);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } return new ResponseEntity("Lỗi xử lí getUserOnline", HttpStatus.BAD_REQUEST);
+    }
+
+    @CrossOrigin(origins = {"http://10.0.2.2:8080", "http://localhost:5173"})
     @GetMapping("user/details/{phone}")
     public ResponseEntity getUserDetails(@PathVariable String phone) throws ExecutionException, InterruptedException {
         try {
@@ -65,6 +80,17 @@ public class UserController {
         } catch (Exception e) {
             e.printStackTrace();
         } return new ResponseEntity<>("Lỗi lấy thông tin User", HttpStatus.BAD_REQUEST);
+    }
+
+    @CrossOrigin(origins = {"http://10.0.2.2:8080", "http://loca    lhost:5173"})
+    @PostMapping("user/details-update")
+    public ResponseEntity updateUserDetails(@RequestBody User user) {
+        try {
+            userService.updateUserDetails(user);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } return new ResponseEntity<>("Lỗi cập nhật", HttpStatus.BAD_REQUEST);
     }
 
     @MessageMapping("/user.testConnect")

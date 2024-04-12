@@ -15,6 +15,7 @@ import java.util.List;
 @Builder
 @ToString
 public class User implements UserDetails {
+    private String user_id;
     private String phone;
     private String password;
     private String name;
