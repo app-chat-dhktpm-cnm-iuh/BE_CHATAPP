@@ -4,6 +4,7 @@ import com.example.BEChatAppCNM.entities.dto.FriendRequest;
 import com.example.BEChatAppCNM.entities.Friend;
 import com.example.BEChatAppCNM.entities.Role;
 import com.example.BEChatAppCNM.entities.User;
+import com.example.BEChatAppCNM.entities.dto.LoginRegisterResponse;
 import com.example.BEChatAppCNM.services.UserService;
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.*;
@@ -14,6 +15,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -37,7 +39,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String saveUser(User user) throws ExecutionException, InterruptedException {
+    public LoginRegisterResponse saveUser(User user) throws ExecutionException, InterruptedException {
         User userTemp = User.builder()
                 .phone(user.getPhone())
                 .name(user.getName())
@@ -48,18 +50,28 @@ public class UserServiceImpl implements UserService {
        db.collection(COLLECTION_NAME)
                 .document()
                 .create(userTemp);
+       User userResponse = getUserDetailsByPhone(user.getPhone()).orElseThrow();
+
        String token = jwtService.generateToken(userTemp);
-        return token;
+
+       LoginRegisterResponse response = LoginRegisterResponse
+               .builder()
+               .user(user)
+               .token(token).build();
+        return response;
     }
 
     @Override
     public Optional<User> getUserDetailsByPhone(String phone_number) throws ExecutionException, InterruptedException {
 
         CollectionReference documentReference = db.collection(COLLECTION_NAME);
-
+        User user = new User();
         ApiFuture<QuerySnapshot> snapshotApiFuture = documentReference.whereEqualTo("phone", phone_number).get();
-        List<User> user = snapshotApiFuture.get().toObjects(User.class);
-        Optional<User> users = user.stream().findFirst();
+        List<User> userList = snapshotApiFuture.get().toObjects(User.class);
+        Optional<User> users = userList.stream().findFirst();
+        users.ifPresent(user1 -> {
+
+        });
         if(!users.isEmpty()) {
             return users;
         } else return null;
@@ -123,11 +135,19 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String checkAccountSignIn(User user) throws ExecutionException, InterruptedException {
+    public LoginRegisterResponse checkAccountLogin(User user) throws ExecutionException, InterruptedException {
         CollectionReference collectionReference = db.collection(COLLECTION_NAME);
-            Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
+        Authentication authentication = authenticationManager
+                .authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
 
             User userTemp = getUserDetailsByPhone(user.getPhone()).orElseThrow();
-            return jwtService.generateToken(userTemp);
+
+            String token = jwtService.generateToken(userTemp);
+            LoginRegisterResponse loginResponse = LoginRegisterResponse.builder()
+                    .user(userTemp)
+                    .token(token)
+                    .build();
+
+            return loginResponse;
     }
 }

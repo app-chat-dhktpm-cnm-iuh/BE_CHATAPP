@@ -1,3 +1,6 @@
 spring:
   application:
     name: BE-ChatApp-CNM
+#logging:
+#  level:
+#    root: DEBUG

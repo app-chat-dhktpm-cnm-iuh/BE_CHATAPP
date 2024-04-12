@@ -17,6 +17,7 @@ public class ChatServiceImpl implements ChatService {
     @Override
     public void saveMessage(MessageRequest messageRequest) {
         CollectionReference collectionReference = db.collection(COLLECTION_NAME);
+
         Message message = Message.builder()
                 .sender_phone(messageRequest.getSender_phone())
                 .attaches(messageRequest.getAttaches())
