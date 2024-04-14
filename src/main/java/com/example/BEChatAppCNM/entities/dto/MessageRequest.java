@@ -19,5 +19,6 @@ public class MessageRequest {
     private List<String> attaches;
     private String sender_phone;
     private Date sent_date_time;
+    private boolean is_read;
     private  boolean is_deleted;
 }

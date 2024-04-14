@@ -117,6 +117,25 @@ public class UserServiceImpl implements UserService {
         return userList;
     }
 
+    @Override
+    public List<User> getListFriendByPhone(String phone) throws ExecutionException, InterruptedException {
+        CollectionReference collectionReference = db.collection(COLLECTION_NAME);
+        ApiFuture<QuerySnapshot> future = collectionReference.whereEqualTo("phone", phone).get();
+        List<User> userList = future.get().toObjects(User.class);
+        List<User> friendList = new ArrayList<>();
+        User user = userList.get(0);
+
+        user.getFriends_list().forEach(friend -> {
+            try {
+                User friendMem = getUserDetailsByPhone(friend.getPhone_user()).orElseThrow();
+                friendList.add(friendMem);
+            } catch (ExecutionException | InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        return friendList;
+    }
+
     public String getDocumentIdsByFieldValue( Object value) throws ExecutionException, InterruptedException {
         CollectionReference collectionReference = db.collection(COLLECTION_NAME);
 

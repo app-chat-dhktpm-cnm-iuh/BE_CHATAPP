@@ -16,4 +16,5 @@ public class Message {
     private List<String> attaches;
     private Date sent_date_time;
     private boolean is_deleted;
+    private boolean is_read;
 }

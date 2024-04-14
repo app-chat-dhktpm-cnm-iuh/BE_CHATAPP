@@ -20,4 +20,6 @@ public interface UserService {
     public void addFriend(FriendRequest friendRequest) throws ExecutionException, InterruptedException;
 
     public List<User> getAllUserOnline() throws ExecutionException, InterruptedException;
+
+    public List<User> getListFriendByPhone(String phone) throws ExecutionException, InterruptedException;
 }

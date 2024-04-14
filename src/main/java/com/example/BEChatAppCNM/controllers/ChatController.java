@@ -52,6 +52,6 @@ public class ChatController {
         messageRequest.getMembers().forEach(members -> {
             messagingTemplate.convertAndSendToUser(members, "/queue/messages", messageRequest);
         });
-        return messageRequest;
+        return messageRequest;  
     }
 }
