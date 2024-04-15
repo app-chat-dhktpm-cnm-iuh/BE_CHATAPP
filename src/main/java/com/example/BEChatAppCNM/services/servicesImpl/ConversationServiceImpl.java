@@ -40,30 +40,6 @@ public class ConversationServiceImpl implements ConversationService {
         CollectionReference collectionReference = db.collection(COLLECTION_NAME);
         List<ConversationResponse> conversationResponses = new ArrayList<>();
 
-        collectionReference.whereEqualTo("creator_phone", creator_phone)
-                .get()
-                .get()
-                .getDocuments()
-                .forEach(document -> {
-                    String documentId = document.getId();
-                    Conversation conversation = document.toObject(Conversation.class);
-                    conversation.setConversation_id(documentId);
-                    List<User> userList = new ArrayList<>();
-                    conversation.getMembers().forEach(phone -> {
-                        try {
-                            Optional<User> user = userService.getUserDetailsByPhone(phone);
-                            userList.add(user.get());
-                        } catch (ExecutionException | InterruptedException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
-                    ConversationResponse conversationResponse = ConversationResponse.builder()
-                            .conversation(conversation)
-                            .memberDetails(userList)
-                            .build();
-                    conversationResponses.add(conversationResponse);
-                });
-
         collectionReference.whereArrayContains("members", creator_phone)
                 .get()
                 .get()
@@ -84,12 +60,7 @@ public class ConversationServiceImpl implements ConversationService {
                             throw new RuntimeException(e);
                         }
                     });
-                    try {
-                        Optional<User> userDetails = userService.getUserDetailsByPhone(conversation.getCreator_phone());
-                        userList.add(userDetails.get());
-                    } catch (ExecutionException | InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
+
                     ConversationResponse conversationResponse = ConversationResponse.builder()
                             .conversation(conversation)
                             .memberDetails(userList)

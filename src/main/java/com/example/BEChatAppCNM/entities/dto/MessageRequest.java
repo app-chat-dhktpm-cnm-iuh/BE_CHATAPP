@@ -13,7 +13,6 @@ import java.util.List;
 @ToString
 public class MessageRequest {
     private String conversation_id;
-    private String creator_phone;
     private List<String> members;
     private String content;
     private List<String> attaches;
