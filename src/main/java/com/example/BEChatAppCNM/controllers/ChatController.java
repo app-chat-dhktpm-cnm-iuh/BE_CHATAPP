@@ -47,7 +47,7 @@ public class ChatController {
     }
 
     @MessageMapping("/chat")
-    public MessageRequest saveMessage(@RequestBody MessageRequest messageRequest) throws ExecutionException, InterruptedException {
+    public MessageRequest saveMessage(MessageRequest messageRequest) throws ExecutionException, InterruptedException {
         chatService.saveMessage(messageRequest);
         messageRequest.getMembers().forEach(member_phone -> {
            if(!member_phone.equals(messageRequest.getSender_phone())) {

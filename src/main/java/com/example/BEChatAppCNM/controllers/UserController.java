@@ -30,7 +30,7 @@ public class UserController {
     @PostMapping("/register")
     public ResponseEntity register(@RequestBody User user) throws ExecutionException, InterruptedException {
         try {
-            LoginRegisterResponse result = userService.saveUser(user);
+                LoginRegisterResponse result = userService.saveUser(user);
             return  new ResponseEntity<>(result, HttpStatus.OK);
         } catch (Exception e) {
             e.printStackTrace();
