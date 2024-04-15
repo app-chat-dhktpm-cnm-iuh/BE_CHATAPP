@@ -28,7 +28,7 @@ public class ConversationServiceImpl implements ConversationService {
     @Override
     public Conversation addConversation(Conversation conversation) {
         CollectionReference collectionReference = db.collection(COLLECTION_NAME);
-        String documentId = collectionReference.getId();
+        String documentId = collectionReference.document().getId();
         conversation.setConversation_id(documentId);
 
         collectionReference.document(documentId).create(conversation);

@@ -49,7 +49,7 @@ public class UserServiceImpl implements UserService {
                 .build();
 
         CollectionReference collectionReference = db.collection(COLLECTION_NAME);
-        String documentId = collectionReference.getId();
+        String documentId = collectionReference.document().getId();
         userTemp.setUser_id(documentId);
         collectionReference.document(documentId).create(userTemp);
 
