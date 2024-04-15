@@ -50,9 +50,7 @@ public class ChatController {
     public MessageRequest saveMessage(MessageRequest messageRequest) throws ExecutionException, InterruptedException {
         chatService.saveMessage(messageRequest);
         messageRequest.getMembers().forEach(member_phone -> {
-           if(!member_phone.equals(messageRequest.getSender_phone())) {
                messagingTemplate.convertAndSendToUser(member_phone, "/queue/messages", messageRequest);
-           }
         });
 
         return messageRequest;  
