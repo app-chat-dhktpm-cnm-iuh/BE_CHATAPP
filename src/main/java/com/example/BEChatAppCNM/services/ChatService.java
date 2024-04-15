@@ -1,5 +1,6 @@
 package com.example.BEChatAppCNM.services;
 
+import com.example.BEChatAppCNM.entities.Conversation;
 import com.example.BEChatAppCNM.entities.dto.MessageRequest;
 
 import java.util.concurrent.ExecutionException;

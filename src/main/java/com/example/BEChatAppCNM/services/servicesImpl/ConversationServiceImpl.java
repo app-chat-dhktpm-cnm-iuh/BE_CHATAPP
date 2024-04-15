@@ -4,6 +4,7 @@ import com.example.BEChatAppCNM.entities.Conversation;
 import com.example.BEChatAppCNM.entities.User;
 import com.example.BEChatAppCNM.entities.dto.ConversationResponse;
 import com.example.BEChatAppCNM.services.ConversationService;
+import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.*;
 import com.google.firebase.cloud.FirestoreClient;
 import org.springframework.stereotype.Service;
@@ -70,4 +71,20 @@ public class ConversationServiceImpl implements ConversationService {
 
         return conversationResponses;
     }
+
+    @Override
+    public Conversation getConversationById(String conversationId) throws ExecutionException, InterruptedException {
+        DocumentReference docRef = db.collection(COLLECTION_NAME).document(conversationId);
+        ApiFuture<DocumentSnapshot> future = docRef.get();
+        DocumentSnapshot document = future.get();
+
+        if (document.exists()) {
+            Conversation conversation = document.toObject(Conversation.class);
+            conversation.setConversation_id(document.getId());
+            return conversation;
+        } else {
+            return null;
+        }
+    }
+
 }

@@ -46,6 +46,15 @@ public class ChatController {
         } else return new ResponseEntity<>("Không tìm thấy hội thoại nào", HttpStatus.NOT_FOUND);
     }
 
+    @CrossOrigin("http://localhost:5173")
+            @GetMapping("user/conversations/{conversation_id}")
+    public ResponseEntity findConversationByID(@PathVariable String conversation_id) throws ExecutionException, InterruptedException {
+        Conversation conversation = conversationService.getConversationById(conversation_id);
+        if(conversation != null) {
+            return new ResponseEntity<>(conversation, HttpStatus.OK);
+        } else return new ResponseEntity<>("Không tìm thấy hội thoại nào", HttpStatus.NOT_FOUND);
+    }
+
     @MessageMapping("/chat")
     public MessageRequest saveMessage(MessageRequest messageRequest) throws ExecutionException, InterruptedException {
         chatService.saveMessage(messageRequest);
