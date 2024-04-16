@@ -41,10 +41,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public LoginRegisterResponse saveUser(User user) throws ExecutionException, InterruptedException {
+        List<Friend> friends = new ArrayList<>();
         User userTemp = User.builder()
                 .phone(user.getPhone())
                 .name(user.getName())
                 .password(passwordEncoder.encode(user.getPassword()))
+                .friends_list(friends)
                 .role(Role.valueOf("USER"))
                 .build();
 
