@@ -55,9 +55,7 @@ public class ConversationServiceImpl implements ConversationService {
                         try {
                             Optional<User> user = userService.getUserDetailsByPhone(phone);
                             userList.add(user.get());
-                        } catch (ExecutionException e) {
-                            throw new RuntimeException(e);
-                        } catch (InterruptedException e) {
+                        } catch (ExecutionException | InterruptedException e) {
                             throw new RuntimeException(e);
                         }
                     });
@@ -73,18 +71,27 @@ public class ConversationServiceImpl implements ConversationService {
     }
 
     @Override
-    public Conversation getConversationById(String conversationId) throws ExecutionException, InterruptedException {
+    public ConversationResponse getConversationById(String conversationId) throws ExecutionException, InterruptedException {
         DocumentReference docRef = db.collection(COLLECTION_NAME).document(conversationId);
         ApiFuture<DocumentSnapshot> future = docRef.get();
         DocumentSnapshot document = future.get();
-
-        if (document.exists()) {
-            Conversation conversation = document.toObject(Conversation.class);
-            conversation.setConversation_id(document.getId());
-            return conversation;
-        } else {
-            return null;
-        }
+        Conversation conversation = document.toObject(Conversation.class);
+        conversation.setConversation_id(document.getId());
+        List<User> meberList = new ArrayList<>();
+        conversation.getMembers().forEach(phone -> {
+            try {
+                Optional<User> user = userService.getUserDetailsByPhone(phone);
+                meberList.add(user.get());
+            } catch (ExecutionException | InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        ConversationResponse conversationResponse = ConversationResponse
+                .builder()
+                .conversation(conversation)
+                .memberDetails(meberList)
+                .build();
+        return conversationResponse;
     }
 
 }
