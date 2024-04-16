@@ -12,6 +12,7 @@ import java.util.List;
 @ToString
 public class Message {
     private String sender_phone;
+    private String sender_name;
     private String content;
     private List<String> attaches;
     private Date sent_date_time;

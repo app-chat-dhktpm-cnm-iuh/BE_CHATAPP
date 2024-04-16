@@ -32,6 +32,7 @@ public class ChatServiceImpl implements ChatService {
         Conversation conversation = conversationService.getConversationById(messageRequest.getConversation_id());
 
         Message message = Message.builder()
+                .sender_name(messageRequest.getSender_name())
                 .sender_phone(messageRequest.getSender_phone())
                 .is_read(messageRequest.is_read())
                 .attaches(messageRequest.getAttaches())

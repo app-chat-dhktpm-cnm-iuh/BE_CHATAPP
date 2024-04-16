@@ -15,6 +15,7 @@ public class MessageRequest {
     private String conversation_id;
     private List<String> members;
     private String content;
+    private String sender_name;
     private List<String> attaches;
     private String sender_phone;
     private Date sent_date_time;
