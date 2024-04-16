@@ -2,6 +2,7 @@ package com.example.BEChatAppCNM.services.servicesImpl;
 
 import com.example.BEChatAppCNM.entities.Conversation;
 import com.example.BEChatAppCNM.entities.Message;
+import com.example.BEChatAppCNM.entities.dto.ConversationResponse;
 import com.example.BEChatAppCNM.entities.dto.MessageRequest;
 import com.example.BEChatAppCNM.services.ChatService;
 import com.example.BEChatAppCNM.services.ConversationService;
@@ -29,8 +30,7 @@ public class ChatServiceImpl implements ChatService {
     @Override
     public void saveMessage(MessageRequest messageRequest) throws ExecutionException, InterruptedException {
         CollectionReference collectionReference = db.collection(COLLECTION_NAME);
-        Conversation conversation = conversationService.getConversationById(messageRequest.getConversation_id());
-
+        ConversationResponse conversationResponse = conversationService.getConversationById(messageRequest.getConversation_id());
         Message message = Message.builder()
                 .sender_name(messageRequest.getSender_name())
                 .sender_phone(messageRequest.getSender_phone())
@@ -41,9 +41,9 @@ public class ChatServiceImpl implements ChatService {
                 .sent_date_time(messageRequest.getSent_date_time())
                 .build();
 
-        conversation.getMessages().add(message);
+        conversationResponse.getConversation().getMessages().add(message);
 
-        collectionReference.document(messageRequest.getConversation_id()).set(conversation);
+        collectionReference.document(messageRequest.getConversation_id()).set(conversationResponse.getConversation());
     }
 
 }
