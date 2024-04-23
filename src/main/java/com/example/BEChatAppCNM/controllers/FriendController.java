@@ -21,17 +21,14 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 @RestController
-//@RequiredArgsConstructor
+@RequiredArgsConstructor
 public class FriendController {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
-    @Autowired
-    private SimpMessagingTemplate messagingTemplate;
+    private final SimpMessagingTemplate messagingTemplate;
 
-    @Autowired
-    private FriendService friendService;
+    private final FriendService friendService;
 
     @CrossOrigin("http://localhost:5173")
     @GetMapping("/user/friends/{currentPhone}")

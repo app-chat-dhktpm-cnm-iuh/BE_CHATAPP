@@ -7,6 +7,7 @@ import com.example.BEChatAppCNM.services.ConversationService;
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.*;
 import com.google.firebase.cloud.FirestoreClient;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -22,7 +23,7 @@ public class ConversationServiceImpl implements ConversationService {
     private final UserServiceImpl userService;
     Firestore db = FirestoreClient.getFirestore();
 
-    public ConversationServiceImpl(UserServiceImpl userService) {
+    public ConversationServiceImpl(@Lazy UserServiceImpl userService) {
         this.userService = userService;
     }
 
@@ -86,11 +87,45 @@ public class ConversationServiceImpl implements ConversationService {
                 throw new RuntimeException(e);
             }
         });
-        ConversationResponse conversationResponse = ConversationResponse
+        return ConversationResponse
                 .builder()
                 .conversation(conversation)
                 .memberDetails(meberList)
                 .build();
+    }
+
+    @Override
+    public ConversationResponse getConversationBySenderPhoneAndReceiverPhone(String senderPhone, String receiverPhone) throws ExecutionException, InterruptedException {
+        CollectionReference collectionReference = db.collection(COLLECTION_NAME);
+
+        List<String> members = new ArrayList<>();
+        members.add(senderPhone);
+        members.add(receiverPhone);
+
+        ConversationResponse conversationResponse = new ConversationResponse();
+        List<User> mems = new ArrayList<>();
+
+        QuerySnapshot documentSnapshot =  collectionReference
+                .whereIn("members", members)
+                .get()
+                .get();
+        System.out.println(documentSnapshot);
+//                .forEach(conversation -> {
+//                    Conversation conversationTemp = conversation.toObject(Conversation.class);
+//                    if(conversationTemp.getMembers().size() == 2) {
+//                        conversationResponse.setConversation(conversationTemp);
+//                        members.forEach(phone -> {
+//                            try {
+//                                User mem = userService.getUserDetailsByPhone(phone).get();
+//                                mems.add(mem);
+//                            } catch (ExecutionException | InterruptedException e) {
+//                                throw new RuntimeException(e);
+//                            }
+//                        });
+//
+//                        conversationResponse.setMemberDetails(mems);
+//                    }
+//                });
         return conversationResponse;
     }
 

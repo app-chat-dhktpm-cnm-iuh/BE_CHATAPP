@@ -9,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
@@ -47,7 +46,17 @@ public class ChatController {
     }
 
     @CrossOrigin("http://localhost:5173")
-            @GetMapping("user/conversations/{conversation_id}")
+    @GetMapping("user/message/{senderPhone}/{receiverPhone}")
+    public ResponseEntity findConversationBySenderPhoneAndReceiverPhone(@PathVariable String senderPhone, @PathVariable String receiverPhone) throws ExecutionException, InterruptedException {
+        ConversationResponse conversationResponse = conversationService.getConversationBySenderPhoneAndReceiverPhone(senderPhone, receiverPhone);
+
+        if(conversationResponse != null) {
+            return new ResponseEntity<>(conversationResponse, HttpStatus.OK);
+        } return new ResponseEntity<>("Không tìm thấy", HttpStatus.NOT_FOUND);
+    }
+
+    @CrossOrigin("http://localhost:5173")
+    @GetMapping("user/conversations/{conversation_id}")
     public ResponseEntity findConversationByID(@PathVariable String conversation_id) throws ExecutionException, InterruptedException {
         ConversationResponse conversation = conversationService.getConversationById(conversation_id);
         if(conversation != null) {

@@ -6,6 +6,7 @@ import com.example.BEChatAppCNM.entities.dto.LoginRegisterResponse;
 import com.example.BEChatAppCNM.entities.User;
 import com.example.BEChatAppCNM.services.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -30,7 +31,7 @@ public class UserController {
     @PostMapping("/register")
     public ResponseEntity register(@RequestBody User user) throws ExecutionException, InterruptedException {
         try {
-                LoginRegisterResponse result = userService.saveUser(user);
+            LoginRegisterResponse result = userService.saveUser(user);
             return  new ResponseEntity<>(result, HttpStatus.OK);
         } catch (Exception e) {
             e.printStackTrace();

@@ -11,4 +11,7 @@ public interface ConversationService {
 
     public List<ConversationResponse> findListConversationByCreatorPhone(String creator_phone) throws ExecutionException, InterruptedException;
     public ConversationResponse getConversationById(String conversationId) throws ExecutionException, InterruptedException;
+
+    public ConversationResponse getConversationBySenderPhoneAndReceiverPhone(String senderPhone, String receiverPhone) throws ExecutionException, InterruptedException;
+
 }
