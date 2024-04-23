@@ -82,7 +82,7 @@ public class UserController {
         } return new ResponseEntity<>("Lỗi lấy thông tin User", HttpStatus.BAD_REQUEST);
     }
 
-    @CrossOrigin(origins = {"http://10.0.2.2:8080", "http://loca    lhost:5173"})
+    @CrossOrigin(origins = {"http://10.0.2.2:8080", "http://localhost:5173"})
     @PostMapping("user/details-update")
     public ResponseEntity updateUserDetails(@RequestBody User user) {
         try {
@@ -90,14 +90,8 @@ public class UserController {
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
             e.printStackTrace();
-        } return new ResponseEntity<>("Lỗi cập nhật", HttpStatus.BAD_REQUEST);
-    }
-
-    @MessageMapping("/user.testConnect")
-    @SendTo("/topic/test")
-    public User testConnect(String message) {
-        User user = User.builder().phone("090988967").role(Role.USER).build();
-        return user;
+        }
+        return new ResponseEntity<>("Lỗi cập nhật", HttpStatus.BAD_REQUEST);
     }
 
     @MessageMapping("/user.userOnline")

@@ -1,5 +1,6 @@
 package com.example.BEChatAppCNM.services;
 
+import com.example.BEChatAppCNM.entities.Conversation;
 import com.example.BEChatAppCNM.entities.dto.FriendRequest;
 import com.example.BEChatAppCNM.entities.User;
 import com.example.BEChatAppCNM.entities.dto.LoginRegisterResponse;
@@ -17,7 +18,7 @@ public interface UserService {
 
     public void updateStatusUser(boolean status, String phone) throws ExecutionException, InterruptedException;
 
-    public void addFriend(FriendRequest friendRequest) throws ExecutionException, InterruptedException;
+    public Conversation addFriend(FriendRequest friendRequest) throws ExecutionException, InterruptedException;
 
     public List<User> getAllUserOnline() throws ExecutionException, InterruptedException;
 
