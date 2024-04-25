@@ -45,8 +45,8 @@ public class FriendController {
     }
     @CrossOrigin("http://localhost:5173")
     @GetMapping("/user/friend-request/{currentPhone}")
-    public ResponseEntity getFriendRequestList(String phone) throws ExecutionException, InterruptedException {
-        List<FriendRequest> friendRequests = friendService.getListFriendRequest(phone);
+    public ResponseEntity getFriendRequestList(@PathVariable String currentPhone) throws ExecutionException, InterruptedException {
+        List<FriendRequest> friendRequests = friendService.getListFriendRequest(currentPhone);
         if(!friendRequests.isEmpty()) {
             return new ResponseEntity(friendRequests, HttpStatus.OK);
         } else return new ResponseEntity("Danh sách lời mời kết bạn rỗng", HttpStatus.NOT_FOUND);
