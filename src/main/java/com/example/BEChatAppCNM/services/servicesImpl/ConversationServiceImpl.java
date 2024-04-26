@@ -10,7 +10,11 @@ import com.google.firebase.cloud.FirestoreClient;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -32,6 +36,7 @@ public class ConversationServiceImpl implements ConversationService {
         CollectionReference collectionReference = db.collection(COLLECTION_NAME);
         String documentId = collectionReference.document().getId();
         conversation.setConversation_id(documentId);
+        conversation.setCreate_at(Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant()));
 
         collectionReference.document(documentId).create(conversation);
         return conversation;
