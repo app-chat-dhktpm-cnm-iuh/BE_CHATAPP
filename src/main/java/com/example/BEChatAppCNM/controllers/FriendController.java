@@ -74,6 +74,11 @@ public class FriendController {
 
              friendService.deleteFriendRequest(friendRequest.getId());
              return friendRequest;
-        } else return friendRequest;
+        } else {
+            friendService.deleteFriendRequest(friendRequest.getId());
+            messagingTemplate.convertAndSendToUser(friendRequest.getSender_phone(), "/queue/friend-reply", friendRequest);
+            messagingTemplate.convertAndSendToUser(friendRequest.getReceiver_phone(), "/queue/friend-reply", friendRequest);
+            return friendRequest;
+        }
     }
 }
