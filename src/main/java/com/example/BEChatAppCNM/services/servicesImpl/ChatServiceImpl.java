@@ -16,6 +16,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.concurrent.ExecutionException;
 
 @Service
@@ -42,6 +45,7 @@ public class ChatServiceImpl implements ChatService {
                 .build();
 
         conversationResponse.getConversation().getMessages().add(message);
+        conversationResponse.getConversation().setUpdated_at(messageRequest.getSent_date_time());
 
         collectionReference.document(messageRequest.getConversation_id()).set(conversationResponse.getConversation());
     }
