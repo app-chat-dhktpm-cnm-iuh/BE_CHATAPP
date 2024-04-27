@@ -36,7 +36,7 @@ public class ConversationServiceImpl implements ConversationService {
         CollectionReference collectionReference = db.collection(COLLECTION_NAME);
         String documentId = collectionReference.document().getId();
         conversation.setConversation_id(documentId);
-        conversation.setCreate_at(Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        conversation.setUpdated_at(Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant()));
 
         collectionReference.document(documentId).create(conversation);
         return conversation;

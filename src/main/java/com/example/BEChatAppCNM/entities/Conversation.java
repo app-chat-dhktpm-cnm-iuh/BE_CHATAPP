@@ -16,7 +16,7 @@ public class Conversation {
     private String creator_phone;
     private String ava_conversation_url;
     private boolean is_deleted;
-    private Date create_at;
+    private Date updated_at;
     private List<String> members;
     private List<Message> messages;
 }
