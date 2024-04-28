@@ -38,6 +38,7 @@ public class ChatServiceImpl implements ChatService {
                 .sender_name(messageRequest.getSender_name())
                 .sender_phone(messageRequest.getSender_phone())
                 .is_read(messageRequest.is_read())
+                .images(messageRequest.getImages())
                 .attaches(messageRequest.getAttaches())
                 .content(messageRequest.getContent())
                 .is_deleted(messageRequest.is_deleted())
