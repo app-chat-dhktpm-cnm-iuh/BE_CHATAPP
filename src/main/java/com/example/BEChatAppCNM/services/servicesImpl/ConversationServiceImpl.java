@@ -13,10 +13,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 @Service
@@ -65,14 +62,13 @@ public class ConversationServiceImpl implements ConversationService {
                             throw new RuntimeException(e);
                         }
                     });
-
                     ConversationResponse conversationResponse = ConversationResponse.builder()
                             .conversation(conversation)
                             .memberDetails(userList)
                             .build();
                     conversationResponses.add(conversationResponse);
                 });
-
+        Collections.sort(conversationResponses, Comparator.comparing(ConversationResponse::getConversationUpdateAt).reversed());
         return conversationResponses;
     }
 

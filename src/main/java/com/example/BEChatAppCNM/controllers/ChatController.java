@@ -9,7 +9,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -36,13 +38,19 @@ public class ChatController {
         return conversationResult;
     }
 
-    @CrossOrigin("http://localhost:5173")
-    @GetMapping("user/messages/{creator_phone}")
-    public ResponseEntity findListConversation(@PathVariable String creator_phone) throws ExecutionException, InterruptedException {
+//    @CrossOrigin("http://localhost:5173")
+//    @GetMapping("user/messages/{creator_phone}")
+//    public ResponseEntity findListConversation(@PathVariable String creator_phone) throws ExecutionException, InterruptedException {
+//        List<ConversationResponse> conversationList = conversationService.findListConversationByCreatorPhone(creator_phone);
+//        if(conversationList.size() != 0) {
+//            return new ResponseEntity<>(conversationList, HttpStatus.OK);
+//        } else return new ResponseEntity<>("Không tìm thấy hội thoại nào", HttpStatus.NOT_FOUND);
+//    }
+    @MessageMapping("/messages/{creator_phone}")
+    public List<ConversationResponse> findListConversation(@PathVariable String creator_phone) throws ExecutionException, InterruptedException {
         List<ConversationResponse> conversationList = conversationService.findListConversationByCreatorPhone(creator_phone);
-        if(conversationList.size() != 0) {
-            return new ResponseEntity<>(conversationList, HttpStatus.OK);
-        } else return new ResponseEntity<>("Không tìm thấy hội thoại nào", HttpStatus.NOT_FOUND);
+        messagingTemplate.convertAndSendToUser(creator_phone, "/conversations", conversationList);
+        return conversationList;
     }
 
     @CrossOrigin("http://localhost:5173")
@@ -68,9 +76,15 @@ public class ChatController {
     public MessageRequest saveMessage(MessageRequest messageRequest) throws ExecutionException, InterruptedException {
         chatService.saveMessage(messageRequest);
         messageRequest.getMembers().forEach(member_phone -> {
-               messagingTemplate.convertAndSendToUser(member_phone, "/queue/messages", messageRequest);
+            messagingTemplate.convertAndSendToUser(member_phone, "/queue/messages", messageRequest);
+            try {
+                List<ConversationResponse> conversationList = conversationService.findListConversationByCreatorPhone(member_phone);
+                messagingTemplate.convertAndSendToUser(member_phone, "/conversations", conversationList);
+            } catch (ExecutionException | InterruptedException e) {
+                throw new RuntimeException(e);
+            }
         });
 
-        return messageRequest;  
+        return messageRequest;
     }
 }
