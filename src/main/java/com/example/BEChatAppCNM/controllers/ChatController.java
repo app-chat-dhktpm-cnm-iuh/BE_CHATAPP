@@ -14,6 +14,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -33,6 +34,14 @@ public class ChatController {
 
         conversationResult.getMembers().forEach((memberPhone) -> {
             messagingTemplate.convertAndSendToUser(memberPhone, "/queue/chat", conversationResult);
+            List<ConversationResponse> conversationList;
+            try {
+                conversationList = conversationService.findListConversationByCreatorPhone(memberPhone);
+            } catch (ExecutionException | InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            messagingTemplate.convertAndSendToUser(memberPhone, "/conversations", conversationList);
+
         });
 
         return conversationResult;
