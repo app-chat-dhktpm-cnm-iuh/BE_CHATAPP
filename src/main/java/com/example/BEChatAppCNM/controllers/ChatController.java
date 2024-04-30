@@ -33,7 +33,7 @@ public class ChatController {
         Conversation conversationResult = conversationService.addConversation(conversation);
 
         conversationResult.getMembers().forEach((memberPhone) -> {
-            messagingTemplate.convertAndSendToUser(memberPhone, "/queue/chat", conversationResult);
+//            messagingTemplate.convertAndSendToUser(memberPhone, "/queue/chat", conversationResult);
             List<ConversationResponse> conversationList;
             try {
                 conversationList = conversationService.findListConversationByCreatorPhone(memberPhone);
