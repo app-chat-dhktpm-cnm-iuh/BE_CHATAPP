@@ -33,34 +33,34 @@ public class ChatController {
         Conversation conversationResult = conversationService.addConversation(conversation);
 
         conversationResult.getMembers().forEach((memberPhone) -> {
-//            messagingTemplate.convertAndSendToUser(memberPhone, "/queue/chat", conversationResult);
-            List<ConversationResponse> conversationList;
-            try {
-                conversationList = conversationService.findListConversationByCreatorPhone(memberPhone);
-            } catch (ExecutionException | InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-            messagingTemplate.convertAndSendToUser(memberPhone, "/conversations", conversationList);
+            messagingTemplate.convertAndSendToUser(memberPhone, "/queue/chat", conversationResult);
+//            List<ConversationResponse> conversationList;
+//            try {
+//                conversationList = conversationService.findListConversationByCreatorPhone(memberPhone);
+//            } catch (ExecutionException | InterruptedException e) {
+//                throw new RuntimeException(e);
+//            }
+//            messagingTemplate.convertAndSendToUser(memberPhone, "/conversations", conversationList);
 
         });
 
         return conversationResult;
     }
 
-//    @CrossOrigin("http://localhost:5173")
-//    @GetMapping("user/messages/{creator_phone}")
-//    public ResponseEntity findListConversation(@PathVariable String creator_phone) throws ExecutionException, InterruptedException {
-//        List<ConversationResponse> conversationList = conversationService.findListConversationByCreatorPhone(creator_phone);
-//        if(conversationList.size() != 0) {
-//            return new ResponseEntity<>(conversationList, HttpStatus.OK);
-//        } else return new ResponseEntity<>("Không tìm thấy hội thoại nào", HttpStatus.NOT_FOUND);
-//    }
-    @MessageMapping("/messages/{creator_phone}")
-    public List<ConversationResponse> findListConversation(@PathVariable String creator_phone) throws ExecutionException, InterruptedException {
+    @CrossOrigin("http://localhost:5173")
+    @GetMapping("user/messages/{creator_phone}")
+    public ResponseEntity findListConversation(@PathVariable String creator_phone) throws ExecutionException, InterruptedException {
         List<ConversationResponse> conversationList = conversationService.findListConversationByCreatorPhone(creator_phone);
-        messagingTemplate.convertAndSendToUser(creator_phone, "/conversations", conversationList);
-        return conversationList;
+        if(conversationList.size() != 0) {
+            return new ResponseEntity<>(conversationList, HttpStatus.OK);
+        } else return new ResponseEntity<>("Không tìm thấy hội thoại nào", HttpStatus.NOT_FOUND);
     }
+//    @MessageMapping("/messages/{creator_phone}")
+//    public List<ConversationResponse> findListConversation(@PathVariable String creator_phone) throws ExecutionException, InterruptedException {
+//        List<ConversationResponse> conversationList = conversationService.findListConversationByCreatorPhone(creator_phone);
+//        messagingTemplate.convertAndSendToUser(creator_phone, "/conversations", conversationList);
+//        return conversationList;
+//    }
 
     @CrossOrigin("http://localhost:5173")
     @GetMapping("user/message/{senderPhone}/{receiverPhone}")
@@ -87,8 +87,8 @@ public class ChatController {
         messageRequest.getMembers().forEach(member_phone -> {
             messagingTemplate.convertAndSendToUser(member_phone, "/queue/messages", messageRequest);
             try {
-                List<ConversationResponse> conversationList = conversationService.findListConversationByCreatorPhone(member_phone);
-                messagingTemplate.convertAndSendToUser(member_phone, "/conversations", conversationList);
+                ConversationResponse conversationResponse = conversationService.getConversationById(messageRequest.getConversation_id());
+                messagingTemplate.convertAndSendToUser(member_phone, "/queue/chat", conversationResponse);
             } catch (ExecutionException | InterruptedException e) {
                 throw new RuntimeException(e);
             }
