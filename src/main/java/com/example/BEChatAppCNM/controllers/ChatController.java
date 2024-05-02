@@ -34,14 +34,6 @@ public class ChatController {
 
         conversationResult.getMembers().forEach((memberPhone) -> {
             messagingTemplate.convertAndSendToUser(memberPhone, "/queue/chat", conversationResult);
-//            List<ConversationResponse> conversationList;
-//            try {
-//                conversationList = conversationService.findListConversationByCreatorPhone(memberPhone);
-//            } catch (ExecutionException | InterruptedException e) {
-//                throw new RuntimeException(e);
-//            }
-//            messagingTemplate.convertAndSendToUser(memberPhone, "/conversations", conversationList);
-
         });
 
         return conversationResult;
@@ -55,12 +47,6 @@ public class ChatController {
             return new ResponseEntity<>(conversationList, HttpStatus.OK);
         } else return new ResponseEntity<>("Không tìm thấy hội thoại nào", HttpStatus.NOT_FOUND);
     }
-//    @MessageMapping("/messages/{creator_phone}")
-//    public List<ConversationResponse> findListConversation(@PathVariable String creator_phone) throws ExecutionException, InterruptedException {
-//        List<ConversationResponse> conversationList = conversationService.findListConversationByCreatorPhone(creator_phone);
-//        messagingTemplate.convertAndSendToUser(creator_phone, "/conversations", conversationList);
-//        return conversationList;
-//    }
 
     @CrossOrigin("http://localhost:5173")
     @GetMapping("user/message/{senderPhone}/{receiverPhone}")

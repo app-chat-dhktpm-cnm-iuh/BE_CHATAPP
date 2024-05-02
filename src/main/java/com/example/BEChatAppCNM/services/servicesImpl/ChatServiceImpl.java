@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 @Service
@@ -34,7 +35,11 @@ public class ChatServiceImpl implements ChatService {
     public void saveMessage(MessageRequest messageRequest) throws ExecutionException, InterruptedException {
         CollectionReference collectionReference = db.collection(COLLECTION_NAME);
         ConversationResponse conversationResponse = conversationService.getConversationById(messageRequest.getConversation_id());
+
+        UUID message_id = UUID.randomUUID();
+
         Message message = Message.builder()
+                .message_id(message_id.toString())
                 .sender_name(messageRequest.getSender_name())
                 .sender_phone(messageRequest.getSender_phone())
                 .is_read(messageRequest.is_read())

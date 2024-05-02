@@ -1,4 +1,5 @@
 package com.example.BEChatAppCNM.entities.dto;
+import com.example.BEChatAppCNM.entities.Attach;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,7 +18,7 @@ public class MessageRequest {
     private String content;
     private String sender_name;
     private List<String> images;
-    private List<String> attaches;
+    private List<Attach> attaches;
     private String sender_phone;
     private Date sent_date_time;
     private boolean is_read;
