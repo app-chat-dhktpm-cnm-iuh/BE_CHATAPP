@@ -15,6 +15,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
@@ -114,26 +116,9 @@ public class UserServiceImpl implements UserService {
     }
 
     public ConversationResponse createConversationAfterAddFriend(FriendRequest friendRequest) throws ExecutionException, InterruptedException {
-//        List<Attach> attaches = new ArrayList<>();
         List<DeleteConversationUser> deleteConversationUsers = new ArrayList<>();
-//        List<String> deleteMessageUsers = new ArrayList<>();
-//
-//        Date sent_date = Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant());
-//        User sender = getUserDetailsByPhone(friendRequest.getSender_phone()).get();
-
-//        Message message = Message
-//                .builder()
-//                .is_read(false)
-//                .attaches(attaches)
-//                .content("")
-//                .sent_date_time(sent_date)
-//                .phoneDeleteList(deleteMessageUsers)
-//                .sender_phone(friendRequest.getSender_phone())
-//                .sender_name(sender.getName())
-//                .build();
 
         List<Message> messages = new ArrayList<>();
-//        messages.add(message);
 
         CollectionReference collectionReference = db.collection(COLLECTION_CONVERSATION);
         String conversationId = collectionReference.document().getId();
@@ -151,6 +136,7 @@ public class UserServiceImpl implements UserService {
                 .deleteConversationUsers(deleteConversationUsers)
                 .creator_phone(friendRequest.getSender_phone())
                 .messages(messages)
+                .updated_at(Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant()))
                 .build();
 
         return conversationService.addConversation(conversation);
