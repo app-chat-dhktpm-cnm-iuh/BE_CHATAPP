@@ -48,15 +48,15 @@ public class ChatController {
         } else return new ResponseEntity<>("Không tìm thấy hội thoại nào", HttpStatus.NOT_FOUND);
     }
 
-    @CrossOrigin("http://localhost:5173")
-    @GetMapping("user/message/{senderPhone}/{receiverPhone}")
-    public ResponseEntity findConversationBySenderPhoneAndReceiverPhone(@PathVariable String senderPhone, @PathVariable String receiverPhone) throws ExecutionException, InterruptedException {
-        ConversationResponse conversationResponse = conversationService.getConversationBySenderPhoneAndReceiverPhone(senderPhone, receiverPhone);
-
-        if(conversationResponse != null) {
-            return new ResponseEntity<>(conversationResponse, HttpStatus.OK);
-        } return new ResponseEntity<>("Không tìm thấy", HttpStatus.NOT_FOUND);
-    }
+//    @CrossOrigin("http://localhost:5173")
+//    @GetMapping("user/message/{senderPhone}/{receiverPhone}")
+//    public ResponseEntity findConversationBySenderPhoneAndReceiverPhone(@PathVariable String senderPhone, @PathVariable String receiverPhone) throws ExecutionException, InterruptedException {
+//        ConversationResponse conversationResponse = conversationService.getConversationBySenderPhoneAndReceiverPhone(senderPhone, receiverPhone);
+//
+//        if(conversationResponse != null) {
+//            return new ResponseEntity<>(conversationResponse, HttpStatus.OK);
+//        } return new ResponseEntity<>("Không tìm thấy", HttpStatus.NOT_FOUND);
+//    }
 
     @CrossOrigin("http://localhost:5173")
     @GetMapping("user/conversations/{conversation_id}")
@@ -81,5 +81,17 @@ public class ChatController {
         });
 
         return messageRequest;
+    }
+
+    @DeleteMapping("user/delete-conversation/{conversationId}/{phoneDelete}")
+    public void deleteConversation(@PathVariable String conversationId, @PathVariable String phoneDelete) throws ExecutionException, InterruptedException {
+        conversationService.deleteConversation(conversationId, phoneDelete);
+        messagingTemplate.convertAndSendToUser(phoneDelete, "/queue/delete-conversation", conversationId);
+    }
+
+    @DeleteMapping("user/delete-message/{conversationId}/{messageId}/{phoneDelete}")
+    public void deleteMessage(String conversationId, String messageId, String phoneDelete) throws ExecutionException, InterruptedException {
+        chatService.deleteMessage(conversationId, messageId, phoneDelete);
+        messagingTemplate.convertAndSendToUser(phoneDelete, "/queue/delete-message", messageId);
     }
 }

@@ -1,6 +1,7 @@
 package com.example.BEChatAppCNM.services.servicesImpl;
 
 import com.example.BEChatAppCNM.entities.Conversation;
+import com.example.BEChatAppCNM.entities.DeleteConversationUser;
 import com.example.BEChatAppCNM.entities.Message;
 import com.example.BEChatAppCNM.entities.dto.ConversationResponse;
 import com.example.BEChatAppCNM.entities.dto.MessageRequest;
@@ -18,7 +19,9 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
@@ -46,7 +49,7 @@ public class ChatServiceImpl implements ChatService {
                 .images(messageRequest.getImages())
                 .attaches(messageRequest.getAttaches())
                 .content(messageRequest.getContent())
-                .is_deleted(messageRequest.is_deleted())
+//                .is_deleted(messageRequest.is_deleted())
                 .sent_date_time(messageRequest.getSent_date_time())
                 .build();
 
@@ -55,5 +58,43 @@ public class ChatServiceImpl implements ChatService {
 
         collectionReference.document(messageRequest.getConversation_id()).set(conversationResponse.getConversation());
     }
+
+    @Override
+    public void deleteMessage(String conversationId, String messageId, String phoneDelete) throws ExecutionException, InterruptedException {
+        CollectionReference collectionReference = db.collection(COLLECTION_NAME);
+        ConversationResponse conversationResponse = conversationService.getConversationById(conversationId);
+        Conversation conversation = conversationResponse.getConversation();
+
+        conversation.getMessages().forEach(message -> {
+            if (message.getMessage_id().equals(messageId)) {
+                message.getPhoneDeleteList().add(phoneDelete);
+            }
+        });
+
+        conversationResponse.setConversation(conversation);
+
+        collectionReference.document(conversationId).set(conversationResponse.getConversation());
+    }
+
+    public List<Message> getListMessageAfterDeleteConversation(Conversation conversation, String userPhone)  {
+        List<Message> messageListReturn = new ArrayList<>();
+        DeleteConversationUser deleteConversationUser = new DeleteConversationUser();
+        List<DeleteConversationUser> deleteConversationUserList = conversation.getDeleteConversationUsers();
+
+        for (int i = 0; i < deleteConversationUserList.size(); i++) {
+            if(deleteConversationUserList.get(i).getUser_phone().equals(userPhone)) {
+                deleteConversationUser = deleteConversationUserList.get(i);
+            }
+        }
+
+        for (int i = 0; i < conversation.getMessages().size(); i++) {
+            if(conversation.getMessages().get(i).getSent_date_time().after(deleteConversationUser.getDeleted_at())) {
+                messageListReturn.add(conversation.getMessages().get(i));
+            }
+        }
+
+        return  messageListReturn;
+    }
+
 
 }

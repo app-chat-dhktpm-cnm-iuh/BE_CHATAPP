@@ -1,6 +1,8 @@
 package com.example.BEChatAppCNM.services.servicesImpl;
 
 import com.example.BEChatAppCNM.entities.Conversation;
+import com.example.BEChatAppCNM.entities.DeleteConversationUser;
+import com.example.BEChatAppCNM.entities.Message;
 import com.example.BEChatAppCNM.entities.User;
 import com.example.BEChatAppCNM.entities.dto.ConversationResponse;
 import com.example.BEChatAppCNM.services.ConversationService;
@@ -11,6 +13,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.*;
@@ -22,10 +25,12 @@ public class ConversationServiceImpl implements ConversationService {
     private static final String COLLECTION_NAME = "conversations";
 
     private final UserServiceImpl userService;
+    private  final ChatServiceImpl chatService;
     Firestore db = FirestoreClient.getFirestore();
 
-    public ConversationServiceImpl(@Lazy UserServiceImpl userService) {
+    public ConversationServiceImpl(@Lazy UserServiceImpl userService, @Lazy ChatServiceImpl chatService) {
         this.userService = userService;
+        this.chatService = chatService;
     }
 
     @Override
@@ -49,28 +54,44 @@ public class ConversationServiceImpl implements ConversationService {
                 .get()
                 .getDocuments()
                 .forEach(document -> {
-                    String documentId = document.getId();
                     Conversation conversation = document.toObject(Conversation.class);
-                    conversation.setConversation_id(documentId);
-
                     List<User> userList = new ArrayList<>();
-                    conversation.getMembers().forEach(phone -> {
-                        try {
-                            Optional<User> user = userService.getUserDetailsByPhone(phone);
-                            userList.add(user.get());
-                        } catch (ExecutionException | InterruptedException e) {
-                            throw new RuntimeException(e);
+                    List<DeleteConversationUser> deleteConversationUserList = conversation.getDeleteConversationUsers();
+
+                    deleteConversationUserList.forEach(deleteConversationUser -> {
+                        conversation.getMembers().forEach(phone -> {
+                            try {
+                                Optional<User> user = userService.getUserDetailsByPhone(phone);
+                                userList.add(user.get());
+                            } catch (ExecutionException | InterruptedException e) {
+                                throw new RuntimeException(e);
+                            }
+                        });
+
+                        if(!deleteConversationUser.getUser_phone().equals(creator_phone)) {
+                            ConversationResponse conversationResponse = ConversationResponse.builder()
+                                    .conversation(conversation)
+                                    .memberDetails(userList)
+                                    .build();
+                            conversationResponses.add(conversationResponse);
+                        } else {
+                           List<Message> messages = chatService.getListMessageAfterDeleteConversation(conversation, creator_phone);
+                           conversation.setMessages(messages);
+
+                            ConversationResponse conversationResponse = ConversationResponse.builder()
+                                    .conversation(conversation)
+                                    .memberDetails(userList)
+                                    .build();
+                            conversationResponses.add(conversationResponse);
                         }
                     });
-                    ConversationResponse conversationResponse = ConversationResponse.builder()
-                            .conversation(conversation)
-                            .memberDetails(userList)
-                            .build();
-                    conversationResponses.add(conversationResponse);
+
                 });
         Collections.sort(conversationResponses, Comparator.comparing(ConversationResponse::getConversationUpdateAt).reversed());
         return conversationResponses;
     }
+
+
 
     @Override
     public ConversationResponse getConversationById(String conversationId) throws ExecutionException, InterruptedException {
@@ -95,22 +116,22 @@ public class ConversationServiceImpl implements ConversationService {
                 .build();
     }
 
-    @Override
-    public ConversationResponse getConversationBySenderPhoneAndReceiverPhone(String senderPhone, String receiverPhone) throws ExecutionException, InterruptedException {
-        CollectionReference collectionReference = db.collection(COLLECTION_NAME);
-
-        List<String> members = new ArrayList<>();
-        members.add(senderPhone);
-        members.add(receiverPhone);
-
-        ConversationResponse conversationResponse = new ConversationResponse();
-        List<User> mems = new ArrayList<>();
-
-        QuerySnapshot documentSnapshot =  collectionReference
-                .whereIn("members", members)
-                .get()
-                .get();
-        System.out.println(documentSnapshot);
+//    @Override
+//    public ConversationResponse getConversationBySenderPhoneAndReceiverPhone(String senderPhone, String receiverPhone) throws ExecutionException, InterruptedException {
+//        CollectionReference collectionReference = db.collection(COLLECTION_NAME);
+//
+//        List<String> members = new ArrayList<>();
+//        members.add(senderPhone);
+//        members.add(receiverPhone);
+//
+//        ConversationResponse conversationResponse = new ConversationResponse();
+//        List<User> mems = new ArrayList<>();
+//
+//        QuerySnapshot documentSnapshot =  collectionReference
+//                .whereIn("members", members)
+//                .get()
+//                .get();
+//        System.out.println(documentSnapshot);
 //                .forEach(conversation -> {
 //                    Conversation conversationTemp = conversation.toObject(Conversation.class);
 //                    if(conversationTemp.getMembers().size() == 2) {
@@ -127,7 +148,30 @@ public class ConversationServiceImpl implements ConversationService {
 //                        conversationResponse.setMemberDetails(mems);
 //                    }
 //                });
-        return conversationResponse;
+//        return conversationResponse;
+//    }
+
+    @Override
+    public void deleteConversation(String conversationId, String currentPhone) throws ExecutionException, InterruptedException {
+        CollectionReference collectionReference = db.collection(COLLECTION_NAME);
+        ConversationResponse conversationResponse = getConversationById(conversationId);
+        Conversation conversation = conversationResponse.getConversation();
+
+        DeleteConversationUser deleteConversationUser = DeleteConversationUser
+                .builder()
+                .user_phone(currentPhone)
+                .deleted_at(Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant()))
+                .build();
+
+        conversation.getDeleteConversationUsers().forEach(deleteConversationUserItem -> {
+            if(!deleteConversationUserItem.getUser_phone().equals(currentPhone)) {
+                conversationResponse.getConversation().getDeleteConversationUsers().add(deleteConversationUser);
+            } else {
+                deleteConversationUserItem.setDeleted_at(deleteConversationUser.getDeleted_at());
+            }
+        });
+
+        collectionReference.document(conversationId).set(conversation);
     }
 
 }
