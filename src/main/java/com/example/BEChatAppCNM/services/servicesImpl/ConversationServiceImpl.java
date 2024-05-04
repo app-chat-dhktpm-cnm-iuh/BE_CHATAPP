@@ -36,6 +36,10 @@ public class ConversationServiceImpl implements ConversationService {
     @Override
     public Conversation addConversation(Conversation conversation) {
         CollectionReference collectionReference = db.collection(COLLECTION_NAME);
+
+        UUID messageId = UUID.randomUUID();
+        conversation.getMessages().get(0).setMessage_id(messageId.toString());
+
         String documentId = collectionReference.document().getId();
         conversation.setConversation_id(documentId);
         conversation.setUpdated_at(Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant()));
@@ -58,42 +62,53 @@ public class ConversationServiceImpl implements ConversationService {
                     List<User> userList = new ArrayList<>();
                     List<DeleteConversationUser> deleteConversationUserList = conversation.getDeleteConversationUsers();
 
-                    deleteConversationUserList.forEach(deleteConversationUser -> {
-                        conversation.getMembers().forEach(phone -> {
-                            try {
-                                Optional<User> user = userService.getUserDetailsByPhone(phone);
-                                userList.add(user.get());
-                            } catch (ExecutionException | InterruptedException e) {
-                                throw new RuntimeException(e);
-                            }
-                        });
+                    conversation.getMembers().forEach(phone -> {
+                        try {
+                            Optional<User> user = userService.getUserDetailsByPhone(phone);
+                            userList.add(user.get());
+                        } catch (ExecutionException | InterruptedException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
 
-                        if(!deleteConversationUser.getUser_phone().equals(creator_phone)) {
+                    if(deleteConversationUserList.isEmpty()) {
+                        ConversationResponse conversationResponse = ConversationResponse.builder()
+                                .conversation(conversation)
+                                .memberDetails(userList)
+                                .build();
+                        conversationResponses.add(conversationResponse);
+                    } else if(checkContainDeleteConversationUser(deleteConversationUserList, creator_phone)) {
+                        List<Message> messages = chatService.getListMessageAfterDeleteConversation(conversation, creator_phone);
+
+                        if(!messages.isEmpty()) {
+                            conversation.setMessages(messages);
+
                             ConversationResponse conversationResponse = ConversationResponse.builder()
                                     .conversation(conversation)
                                     .memberDetails(userList)
                                     .build();
                             conversationResponses.add(conversationResponse);
-                        } else {
-                           List<Message> messages = chatService.getListMessageAfterDeleteConversation(conversation, creator_phone);
-
-                           if(!messages.isEmpty()) {
-                               conversation.setMessages(messages);
-
-                               ConversationResponse conversationResponse = ConversationResponse.builder()
-                                       .conversation(conversation)
-                                       .memberDetails(userList)
-                                       .build();
-                               conversationResponses.add(conversationResponse);
-                           }
                         }
-                    });
-
+                    } else {
+                        ConversationResponse conversationResponse = ConversationResponse.builder()
+                                .conversation(conversation)
+                                .memberDetails(userList)
+                                .build();
+                        conversationResponses.add(conversationResponse);
+                    }
                 });
         Collections.sort(conversationResponses, Comparator.comparing(ConversationResponse::getConversationUpdateAt).reversed());
         return conversationResponses;
     }
 
+    public boolean checkContainDeleteConversationUser(List<DeleteConversationUser> deleteConversationUsers, String phoneUser) {
+        for(DeleteConversationUser deleteConversationUser : deleteConversationUsers) {
+            if(deleteConversationUser.getUser_phone().equals(phoneUser)) {
+                return true;
+            } else return false;
+        }
+        return false;
+    }
 
 
     @Override
