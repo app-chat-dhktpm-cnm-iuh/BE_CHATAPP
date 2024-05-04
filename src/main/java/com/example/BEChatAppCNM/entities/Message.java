@@ -18,7 +18,6 @@ public class Message {
     private List<String> images;
     private List<Attach> attaches;
     private Date sent_date_time;
-//    private boolean is_deleted;
     private List<String> phoneDeleteList;
     private boolean is_read;
 }

@@ -76,13 +76,16 @@ public class ConversationServiceImpl implements ConversationService {
                             conversationResponses.add(conversationResponse);
                         } else {
                            List<Message> messages = chatService.getListMessageAfterDeleteConversation(conversation, creator_phone);
-                           conversation.setMessages(messages);
 
-                            ConversationResponse conversationResponse = ConversationResponse.builder()
-                                    .conversation(conversation)
-                                    .memberDetails(userList)
-                                    .build();
-                            conversationResponses.add(conversationResponse);
+                           if(!messages.isEmpty()) {
+                               conversation.setMessages(messages);
+
+                               ConversationResponse conversationResponse = ConversationResponse.builder()
+                                       .conversation(conversation)
+                                       .memberDetails(userList)
+                                       .build();
+                               conversationResponses.add(conversationResponse);
+                           }
                         }
                     });
 
