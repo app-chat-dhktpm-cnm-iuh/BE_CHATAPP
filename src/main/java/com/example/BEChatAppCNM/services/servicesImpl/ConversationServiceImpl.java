@@ -37,9 +37,6 @@ public class ConversationServiceImpl implements ConversationService {
     public Conversation addConversation(Conversation conversation) {
         CollectionReference collectionReference = db.collection(COLLECTION_NAME);
 
-        UUID messageId = UUID.randomUUID();
-        conversation.getMessages().get(0).setMessage_id(messageId.toString());
-
         String documentId = collectionReference.document().getId();
         conversation.setConversation_id(documentId);
         conversation.setUpdated_at(Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant()));

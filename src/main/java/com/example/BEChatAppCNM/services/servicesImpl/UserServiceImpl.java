@@ -115,26 +115,26 @@ public class UserServiceImpl implements UserService {
     }
 
     public Conversation createConversationAfterAddFriend(FriendRequest friendRequest) throws ExecutionException, InterruptedException {
-        List<Attach> attaches = new ArrayList<>();
+//        List<Attach> attaches = new ArrayList<>();
         List<DeleteConversationUser> deleteConversationUsers = new ArrayList<>();
-        List<String> deleteMessageUsers = new ArrayList<>();
+//        List<String> deleteMessageUsers = new ArrayList<>();
+//
+//        Date sent_date = Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant());
+//        User sender = getUserDetailsByPhone(friendRequest.getSender_phone()).get();
 
-        Date sent_date = Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant());
-        User sender = getUserDetailsByPhone(friendRequest.getSender_phone()).get();
-
-        Message message = Message
-                .builder()
-                .is_read(false)
-                .attaches(attaches)
-                .content("")
-                .sent_date_time(sent_date)
-                .phoneDeleteList(deleteMessageUsers)
-                .sender_phone(friendRequest.getSender_phone())
-                .sender_name(sender.getName())
-                .build();
+//        Message message = Message
+//                .builder()
+//                .is_read(false)
+//                .attaches(attaches)
+//                .content("")
+//                .sent_date_time(sent_date)
+//                .phoneDeleteList(deleteMessageUsers)
+//                .sender_phone(friendRequest.getSender_phone())
+//                .sender_name(sender.getName())
+//                .build();
 
         List<Message> messages = new ArrayList<>();
-        messages.add(message);
+//        messages.add(message);
 
         CollectionReference collectionReference = db.collection(COLLECTION_CONVERSATION);
         String conversationId = collectionReference.document().getId();
