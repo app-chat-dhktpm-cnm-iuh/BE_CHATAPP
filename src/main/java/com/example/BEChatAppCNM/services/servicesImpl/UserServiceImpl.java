@@ -115,7 +115,9 @@ public class UserServiceImpl implements UserService {
     }
 
     public Conversation createConversationAfterAddFriend(FriendRequest friendRequest) throws ExecutionException, InterruptedException {
-        List<String> attaches = new ArrayList<>();
+        List<Attach> attaches = new ArrayList<>();
+        List<DeleteConversationUser> deleteConversationUsers = new ArrayList<>();
+        List<String> deleteMessageUsers = new ArrayList<>();
 
         Date sent_date = Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant());
         User sender = getUserDetailsByPhone(friendRequest.getSender_phone()).get();
@@ -123,10 +125,10 @@ public class UserServiceImpl implements UserService {
         Message message = Message
                 .builder()
                 .is_read(false)
-                .is_deleted(false)
                 .attaches(attaches)
                 .content("")
                 .sent_date_time(sent_date)
+                .phoneDeleteList(deleteMessageUsers)
                 .sender_phone(friendRequest.getSender_phone())
                 .sender_name(sender.getName())
                 .build();
@@ -147,7 +149,7 @@ public class UserServiceImpl implements UserService {
                 .ava_conversation_url("")
                 .members(members)
                 .title("")
-                .is_deleted(false)
+                .deleteConversationUsers(deleteConversationUsers)
                 .creator_phone(friendRequest.getSender_phone())
                 .messages(messages)
                 .build();

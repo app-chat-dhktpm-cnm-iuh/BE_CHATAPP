@@ -38,6 +38,7 @@ public class ChatServiceImpl implements ChatService {
     public void saveMessage(MessageRequest messageRequest) throws ExecutionException, InterruptedException {
         CollectionReference collectionReference = db.collection(COLLECTION_NAME);
         ConversationResponse conversationResponse = conversationService.getConversationById(messageRequest.getConversation_id());
+        List<String> deleteMessageUsers = new ArrayList<>();
 
         UUID message_id = UUID.randomUUID();
 
@@ -49,7 +50,7 @@ public class ChatServiceImpl implements ChatService {
                 .images(messageRequest.getImages())
                 .attaches(messageRequest.getAttaches())
                 .content(messageRequest.getContent())
-//                .is_deleted(messageRequest.is_deleted())
+                .phoneDeleteList(deleteMessageUsers)
                 .sent_date_time(messageRequest.getSent_date_time())
                 .build();
 
