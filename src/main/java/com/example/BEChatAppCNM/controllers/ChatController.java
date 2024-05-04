@@ -28,11 +28,10 @@ public class ChatController {
     private final SimpMessagingTemplate messagingTemplate;
 
     @MessageMapping("/user.creatConversation")
-    public Conversation createConversation(Conversation conversation) {
+    public ConversationResponse createConversation(Conversation conversation) {
+        ConversationResponse conversationResult = conversationService.addConversation(conversation);
 
-        Conversation conversationResult = conversationService.addConversation(conversation);
-
-        conversationResult.getMembers().forEach((memberPhone) -> {
+        conversation.getMembers().forEach((memberPhone) -> {
             messagingTemplate.convertAndSendToUser(memberPhone, "/queue/chat", conversationResult);
         });
 

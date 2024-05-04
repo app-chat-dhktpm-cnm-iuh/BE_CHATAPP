@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 public interface ConversationService {
-    public Conversation addConversation (Conversation conversation);
+    public ConversationResponse addConversation (Conversation conversation);
 
     public List<ConversationResponse> findListConversationByCreatorPhone(String creator_phone) throws ExecutionException, InterruptedException;
     public ConversationResponse getConversationById(String conversationId) throws ExecutionException, InterruptedException;

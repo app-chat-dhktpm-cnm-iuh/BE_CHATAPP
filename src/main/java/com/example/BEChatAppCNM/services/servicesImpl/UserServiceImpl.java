@@ -1,6 +1,7 @@
 package com.example.BEChatAppCNM.services.servicesImpl;
 
 import com.example.BEChatAppCNM.entities.*;
+import com.example.BEChatAppCNM.entities.dto.ConversationResponse;
 import com.example.BEChatAppCNM.entities.dto.FriendRequest;
 import com.example.BEChatAppCNM.entities.dto.LoginRegisterResponse;
 import com.example.BEChatAppCNM.services.ConversationService;
@@ -14,8 +15,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
@@ -95,7 +94,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Conversation addFriend(FriendRequest friendRequest) throws ExecutionException, InterruptedException {
+    public ConversationResponse addFriend(FriendRequest friendRequest) throws ExecutionException, InterruptedException {
         String documentIdSender = getDocumentIdsByPhoneValue(friendRequest.getSender_phone());
         String documentIdReceiver = getDocumentIdsByPhoneValue(friendRequest.getReceiver_phone());
 
@@ -114,7 +113,7 @@ public class UserServiceImpl implements UserService {
         return createConversationAfterAddFriend(friendRequest);
     }
 
-    public Conversation createConversationAfterAddFriend(FriendRequest friendRequest) throws ExecutionException, InterruptedException {
+    public ConversationResponse createConversationAfterAddFriend(FriendRequest friendRequest) throws ExecutionException, InterruptedException {
 //        List<Attach> attaches = new ArrayList<>();
         List<DeleteConversationUser> deleteConversationUsers = new ArrayList<>();
 //        List<String> deleteMessageUsers = new ArrayList<>();

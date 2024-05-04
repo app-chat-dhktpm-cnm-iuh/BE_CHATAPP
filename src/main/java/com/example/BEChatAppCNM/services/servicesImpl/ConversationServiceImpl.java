@@ -13,9 +13,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
@@ -34,15 +32,32 @@ public class ConversationServiceImpl implements ConversationService {
     }
 
     @Override
-    public Conversation addConversation(Conversation conversation) {
+    public ConversationResponse addConversation(Conversation conversation) {
         CollectionReference collectionReference = db.collection(COLLECTION_NAME);
-
         String documentId = collectionReference.document().getId();
-        conversation.setConversation_id(documentId);
-        conversation.setUpdated_at(Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant()));
 
+        List<User> userList = new ArrayList<>();
+
+        conversation.setConversation_id(documentId);
+        conversation.setUpdated_at(conversation.getUpdated_at());
         collectionReference.document(documentId).create(conversation);
-        return conversation;
+
+        conversation.getMembers().forEach(phone -> {
+            try {
+                Optional<User> user = userService.getUserDetailsByPhone(phone);
+                userList.add(user.get());
+            } catch (ExecutionException | InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        ConversationResponse conversationResponse = ConversationResponse
+                .builder()
+                .conversation(conversation)
+                .memberDetails(userList)
+                .build();
+
+        return conversationResponse;
     }
 
     @Override

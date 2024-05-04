@@ -2,6 +2,7 @@ package com.example.BEChatAppCNM.controllers;
 
 import com.example.BEChatAppCNM.entities.Conversation;
 import com.example.BEChatAppCNM.entities.User;
+import com.example.BEChatAppCNM.entities.dto.ConversationResponse;
 import com.example.BEChatAppCNM.entities.dto.FriendRequest;
 import com.example.BEChatAppCNM.services.FriendService;
 import com.example.BEChatAppCNM.services.UserService;
@@ -63,10 +64,10 @@ public class FriendController {
     @MessageMapping("/user.replyFriendRequest")
     public  FriendRequest replyFriendRequest(FriendRequest friendRequest) throws ExecutionException, InterruptedException {
         if(friendRequest.isAceppted()) {
-             Conversation conversation = userService.addFriend(friendRequest);
+             ConversationResponse conversationResult = userService.addFriend(friendRequest);
 
-             conversation.getMembers().forEach((memberPhone) -> {
-                messagingTemplate.convertAndSendToUser(memberPhone, "/queue/chat", conversation);
+             conversationResult.getConversation().getMembers().forEach((memberPhone) -> {
+                messagingTemplate.convertAndSendToUser(memberPhone, "/queue/chat", conversationResult);
             });
 
              messagingTemplate.convertAndSendToUser(friendRequest.getSender_phone(), "/queue/friend-reply", friendRequest);
