@@ -83,14 +83,14 @@ public class ChatController {
     }
 
     @DeleteMapping("user/delete-conversation/{conversationId}/{phoneDelete}")
-    public void deleteConversation(@PathVariable String conversationId, @PathVariable String phoneDelete) throws ExecutionException, InterruptedException {
+    public String deleteConversation(@PathVariable String conversationId, @PathVariable String phoneDelete) throws ExecutionException, InterruptedException {
         conversationService.deleteConversation(conversationId, phoneDelete);
-        messagingTemplate.convertAndSendToUser(phoneDelete, "/queue/delete-conversation", conversationId);
+        return conversationId;
     }
 
     @DeleteMapping("user/delete-message/{conversationId}/{messageId}/{phoneDelete}")
-    public void deleteMessage(String conversationId, String messageId, String phoneDelete) throws ExecutionException, InterruptedException {
+    public String deleteMessage(String conversationId, String messageId, String phoneDelete) throws ExecutionException, InterruptedException {
         chatService.deleteMessage(conversationId, messageId, phoneDelete);
-        messagingTemplate.convertAndSendToUser(phoneDelete, "/queue/delete-message", messageId);
+        return messageId;
     }
 }
