@@ -89,7 +89,7 @@ public class ChatController {
     }
 
     @DeleteMapping("user/delete-message/{conversationId}/{messageId}/{phoneDelete}")
-    public String deleteMessage(String conversationId, String messageId, String phoneDelete) throws ExecutionException, InterruptedException {
+    public String deleteMessage(@PathVariable String conversationId,@PathVariable String messageId,@PathVariable String phoneDelete) throws ExecutionException, InterruptedException {
         chatService.deleteMessage(conversationId, messageId, phoneDelete);
         return messageId;
     }
