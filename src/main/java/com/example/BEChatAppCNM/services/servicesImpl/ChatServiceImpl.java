@@ -96,6 +96,32 @@ public class ChatServiceImpl implements ChatService {
                 if(user.getPhone().equals(memPhone)) {
                     listMember.add(user);
                     conversationResult.setMemberDetails(listMember);
+                    conversationResult.setConversation(conversation);
+                }
+            }
+
+            return conversationResult;
+        }
+    }
+
+    @Override
+    public ConversationResponse deleteMemberFromGroupChat(String conversationId, String memPhone, String keyPhone) throws ExecutionException, InterruptedException {
+        CollectionReference collectionReference = db.collection(COLLECTION_NAME);
+        ConversationResponse conversationResult = conversationService.getConversationById(conversationId);
+        Conversation conversation = conversationResult.getConversation();
+        List<User> listMember = new ArrayList<>();
+
+        if(!keyPhone.equals(conversation.getCreator_phone())) {
+            return null;
+        } else {
+            conversation.getMembers().remove(memPhone);
+            collectionReference.document(conversationId).set(conversation);
+
+            for (User user : conversationResult.getMemberDetails()) {
+                if(user.getPhone().equals(memPhone)) {
+                    listMember.add(user);
+                    conversationResult.setMemberDetails(listMember);
+                    conversationResult.setConversation(conversation);
                 }
             }
 

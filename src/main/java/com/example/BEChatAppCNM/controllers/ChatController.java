@@ -95,7 +95,7 @@ public class ChatController {
         return messageId;
     }
 
-    @PostMapping("user/add-member/{keyPhone}/{userPhone}/{conversationId}")
+    @PostMapping("user/add-member/{keyPhone}/{memPhone}/{conversationId}")
     public ResponseEntity addMemberToChatGroup(@PathVariable String keyPhone, @PathVariable String memPhone, @PathVariable String conversationId) throws ExecutionException, InterruptedException {
         ConversationResponse conversationResponse = chatService.addMemberToGroupChat(conversationId, memPhone, keyPhone);
         if(conversationResponse == null) {
@@ -107,4 +107,15 @@ public class ChatController {
         return new ResponseEntity(conversationResponse, HttpStatus.OK);
     }
 
+    @PostMapping("user/delete-member/{keyPhone}/{memPhone}/{conversationId}")
+    public ResponseEntity deleteMemberFromChatGroup(@PathVariable String keyPhone, @PathVariable String memPhone, @PathVariable String conversationId) throws ExecutionException, InterruptedException {
+        ConversationResponse conversationResponse = chatService.deleteMemberFromGroupChat(conversationId, memPhone, keyPhone);
+        if(conversationResponse == null) {
+            return new ResponseEntity<>("Không phải là trưởng nhóm nên không có quyền quản lí nhóm", HttpStatus.UNAUTHORIZED);
+        }
+        conversationResponse.getConversation().getMembers().forEach(member -> {
+            messagingTemplate.convertAndSendToUser(member, "queue/notify-groupchat", conversationResponse);
+        });
+        return new ResponseEntity(conversationResponse, HttpStatus.OK);
+    }
 }

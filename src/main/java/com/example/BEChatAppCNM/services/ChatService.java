@@ -12,4 +12,6 @@ public interface ChatService {
     public void deleteMessage(String conversationId, String messageId, String phoneDelete) throws ExecutionException, InterruptedException;
 
     public ConversationResponse addMemberToGroupChat(String conversationId, String memPhone, String keyPhone) throws ExecutionException, InterruptedException;
+    public ConversationResponse deleteMemberFromGroupChat(String conversationId, String memPhone, String keyPhone) throws ExecutionException, InterruptedException;
+
 }
