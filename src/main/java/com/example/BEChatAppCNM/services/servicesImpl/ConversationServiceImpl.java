@@ -39,7 +39,6 @@ public class ConversationServiceImpl implements ConversationService {
         List<User> userList = new ArrayList<>();
 
         conversation.setConversation_id(documentId);
-        conversation.setUpdated_at(conversation.getUpdated_at());
         collectionReference.document(documentId).create(conversation);
 
         conversation.getMembers().forEach(phone -> {

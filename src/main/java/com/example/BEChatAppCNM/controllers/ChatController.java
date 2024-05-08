@@ -28,8 +28,8 @@ public class ChatController {
 
     private final SimpMessagingTemplate messagingTemplate;
 
-    @MessageMapping("/user.creatConversation")
-    public ConversationResponse createConversation(Conversation conversation) {
+    @MessageMapping("/user.creatGroupChat")
+    public ConversationResponse createGroupChat(Conversation conversation) {
         ConversationResponse conversationResult = conversationService.addConversation(conversation);
 
         conversation.getMembers().forEach((memberPhone) -> {

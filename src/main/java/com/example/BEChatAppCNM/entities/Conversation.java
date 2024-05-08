@@ -13,6 +13,7 @@ import java.util.List;
 public class Conversation {
     private String conversation_id;
     private String title;
+    private boolean is_group;
     private String creator_phone;
     private String ava_conversation_url;
     private List<DeleteConversationUser> deleteConversationUsers;

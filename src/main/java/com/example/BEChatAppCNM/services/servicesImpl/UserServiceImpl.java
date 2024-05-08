@@ -135,6 +135,7 @@ public class UserServiceImpl implements UserService {
                 .title("")
                 .deleteConversationUsers(deleteConversationUsers)
                 .creator_phone(friendRequest.getSender_phone())
+                .is_group(false)
                 .messages(messages)
                 .updated_at(Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant()))
                 .build();
