@@ -3,6 +3,7 @@ package com.example.BEChatAppCNM.services.servicesImpl;
 import com.example.BEChatAppCNM.entities.Conversation;
 import com.example.BEChatAppCNM.entities.DeleteConversationUser;
 import com.example.BEChatAppCNM.entities.Message;
+import com.example.BEChatAppCNM.entities.User;
 import com.example.BEChatAppCNM.entities.dto.ConversationResponse;
 import com.example.BEChatAppCNM.entities.dto.MessageRequest;
 import com.example.BEChatAppCNM.services.ChatService;
@@ -17,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.Member;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -75,6 +77,30 @@ public class ChatServiceImpl implements ChatService {
         conversationResponse.setConversation(conversation);
 
         collectionReference.document(conversationId).set(conversationResponse.getConversation());
+    }
+
+    @Override
+    public ConversationResponse addMemberToGroupChat(String conversationId, String memPhone, String keyPhone) throws ExecutionException, InterruptedException {
+        CollectionReference collectionReference = db.collection(COLLECTION_NAME);
+        ConversationResponse conversationResult = conversationService.getConversationById(conversationId);
+        Conversation conversation = conversationResult.getConversation();
+        List<User> listMember = new ArrayList<>();
+
+        if(!keyPhone.equals(conversation.getCreator_phone())) {
+            return null;
+        } else {
+            conversation.getMembers().add(memPhone);
+            collectionReference.document(conversationId).set(conversation);
+
+            for (User user : conversationResult.getMemberDetails()) {
+                if(user.getPhone().equals(memPhone)) {
+                    listMember.add(user);
+                    conversationResult.setMemberDetails(listMember);
+                }
+            }
+
+            return conversationResult;
+        }
     }
 
     public List<Message> getListMessageAfterDeleteConversation(Conversation conversation, String userPhone)  {

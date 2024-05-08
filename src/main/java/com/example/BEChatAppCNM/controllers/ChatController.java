@@ -1,6 +1,7 @@
 package com.example.BEChatAppCNM.controllers;
 
 import com.example.BEChatAppCNM.entities.Conversation;
+import com.example.BEChatAppCNM.entities.User;
 import com.example.BEChatAppCNM.entities.dto.ConversationResponse;
 import com.example.BEChatAppCNM.entities.dto.MessageRequest;
 import com.example.BEChatAppCNM.services.ChatService;
@@ -93,4 +94,17 @@ public class ChatController {
         chatService.deleteMessage(conversationId, messageId, phoneDelete);
         return messageId;
     }
+
+    @PostMapping("user/add-member/{keyPhone}/{userPhone}/{conversationId}")
+    public ResponseEntity addMemberToChatGroup(@PathVariable String keyPhone, @PathVariable String memPhone, @PathVariable String conversationId) throws ExecutionException, InterruptedException {
+        ConversationResponse conversationResponse = chatService.addMemberToGroupChat(conversationId, memPhone, keyPhone);
+        if(conversationResponse == null) {
+            return new ResponseEntity<>("Không phải là trưởng nhóm nên không có quyền quản lí nhóm", HttpStatus.UNAUTHORIZED);
+        }
+        conversationResponse.getConversation().getMembers().forEach(member -> {
+            messagingTemplate.convertAndSendToUser(member, "queue/notify-groupchat", conversationResponse);
+        });
+        return new ResponseEntity(conversationResponse, HttpStatus.OK);
+    }
+
 }
