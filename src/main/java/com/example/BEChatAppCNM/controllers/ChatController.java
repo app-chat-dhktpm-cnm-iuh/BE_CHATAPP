@@ -118,4 +118,16 @@ public class ChatController {
         });
         return new ResponseEntity(conversationResponse, HttpStatus.OK);
     }
+
+    @DeleteMapping("user/disband-groupchat/{keyPhone}/{conversationId}")
+    public ResponseEntity disbandTheChatGroup(@PathVariable String keyPhone, @PathVariable String conversationId) throws ExecutionException, InterruptedException {
+        Conversation conversationResponse = chatService.disbandGroupChat(conversationId, keyPhone);
+        if(conversationResponse == null) {
+            return new ResponseEntity<>("Không phải là trưởng nhóm nên không có quyền quản lí nhóm", HttpStatus.UNAUTHORIZED);
+        }
+        conversationResponse.getMembers().forEach(member -> {
+            messagingTemplate.convertAndSendToUser(member, "queue/notify-groupchat", conversationResponse.getConversation_id());
+        });
+        return new ResponseEntity(conversationResponse, HttpStatus.OK);
+    }
 }

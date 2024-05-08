@@ -8,21 +8,13 @@ import com.example.BEChatAppCNM.entities.dto.ConversationResponse;
 import com.example.BEChatAppCNM.entities.dto.MessageRequest;
 import com.example.BEChatAppCNM.services.ChatService;
 import com.example.BEChatAppCNM.services.ConversationService;
-import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.CollectionReference;
-import com.google.cloud.firestore.DocumentReference;
-import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 import com.google.firebase.cloud.FirestoreClient;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
-import java.lang.reflect.Member;
-import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
@@ -126,6 +118,19 @@ public class ChatServiceImpl implements ChatService {
             }
 
             return conversationResult;
+        }
+    }
+
+    @Override
+    public Conversation disbandGroupChat(String conversationId, String keyPhone) throws ExecutionException, InterruptedException {
+        CollectionReference collectionReference = db.collection(COLLECTION_NAME);
+        ConversationResponse conversationResult = conversationService.getConversationById(conversationId);
+        Conversation conversation = conversationResult.getConversation();
+        if(!keyPhone.equals(conversationResult.getConversation().getCreator_phone())) {
+            return null;
+        } else {
+            collectionReference.document(conversationId).delete();
+            return conversation;
         }
     }
 
