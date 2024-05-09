@@ -194,7 +194,7 @@ public class ConversationServiceImpl implements ConversationService {
 
         conversation.getDeleteConversationUsers().forEach(deleteConversationUserItem -> {
             if(!deleteConversationUserItem.getUser_phone().equals(currentPhone)) {
-                conversationResponse.getConversation().getDeleteConversationUsers().add(deleteConversationUser);
+                conversation.getDeleteConversationUsers().add(deleteConversationUser);
             } else {
                 deleteConversationUserItem.setDeleted_at(deleteConversationUser.getDeleted_at());
             }
