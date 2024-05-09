@@ -192,13 +192,17 @@ public class ConversationServiceImpl implements ConversationService {
                 .deleted_at(Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant()))
                 .build();
 
-        conversation.getDeleteConversationUsers().forEach(deleteConversationUserItem -> {
-            if(!deleteConversationUserItem.getUser_phone().equals(currentPhone)) {
-                conversation.getDeleteConversationUsers().add(deleteConversationUser);
-            } else {
-                deleteConversationUserItem.setDeleted_at(deleteConversationUser.getDeleted_at());
-            }
-        });
+        if(!conversation.getDeleteConversationUsers().isEmpty()) {
+            conversation.getDeleteConversationUsers().forEach(deleteConversationUserItem -> {
+                if(!deleteConversationUserItem.getUser_phone().equals(currentPhone)) {
+                    conversation.getDeleteConversationUsers().add(deleteConversationUser);
+                } else {
+                    deleteConversationUserItem.setDeleted_at(deleteConversationUser.getDeleted_at());
+                }
+            });
+        } else {
+            conversation.getDeleteConversationUsers().add(deleteConversationUser);
+        }
 
         collectionReference.document(conversationId).set(conversation);
     }
