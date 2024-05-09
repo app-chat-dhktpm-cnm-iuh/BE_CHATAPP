@@ -185,6 +185,11 @@ public class ConversationServiceImpl implements ConversationService {
         CollectionReference collectionReference = db.collection(COLLECTION_NAME);
         ConversationResponse conversationResponse = getConversationById(conversationId);
         Conversation conversation = conversationResponse.getConversation();
+        List<String> deleteConversationUserPhone = new ArrayList<>();
+
+        for (DeleteConversationUser deleteConversationUserItem : conversation.getDeleteConversationUsers()) {
+            deleteConversationUserPhone.add(deleteConversationUserItem.getUser_phone());
+        }
 
         DeleteConversationUser deleteConversationUser = DeleteConversationUser
                 .builder()
@@ -193,17 +198,18 @@ public class ConversationServiceImpl implements ConversationService {
                 .build();
 
         if(!conversation.getDeleteConversationUsers().isEmpty()) {
-            conversation.getDeleteConversationUsers().forEach(deleteConversationUserItem -> {
-                if(!deleteConversationUserItem.getUser_phone().equals(currentPhone)) {
-                    conversation.getDeleteConversationUsers().add(deleteConversationUser);
-                } else {
-                    deleteConversationUserItem.setDeleted_at(deleteConversationUser.getDeleted_at());
+            if(!deleteConversationUserPhone.contains(currentPhone)) {
+                conversation.getDeleteConversationUsers().add(deleteConversationUser);
+            } else {
+                for (DeleteConversationUser conversationUser : conversation.getDeleteConversationUsers()) {
+                    if(conversationUser.getUser_phone().equals(currentPhone)) {
+                        conversationUser.setDeleted_at(deleteConversationUser.getDeleted_at());
+                    }
                 }
-            });
+            }
         } else {
             conversation.getDeleteConversationUsers().add(deleteConversationUser);
         }
-
         collectionReference.document(conversationId).set(conversation);
     }
 
