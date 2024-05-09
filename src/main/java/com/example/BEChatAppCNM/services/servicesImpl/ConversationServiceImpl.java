@@ -128,7 +128,9 @@ public class ConversationServiceImpl implements ConversationService {
         ApiFuture<DocumentSnapshot> future = docRef.get();
         DocumentSnapshot document = future.get();
         Conversation conversation = document.toObject(Conversation.class);
-        conversation.setConversation_id(document.getId());
+
+//        conversation.setConversation_id(document.getId());
+
         List<User> meberList = new ArrayList<>();
         conversation.getMembers().forEach(phone -> {
             try {
@@ -138,10 +140,64 @@ public class ConversationServiceImpl implements ConversationService {
                 throw new RuntimeException(e);
             }
         });
+
+
         return ConversationResponse
                 .builder()
                 .conversation(conversation)
                 .memberDetails(meberList)
+                .build();
+    }
+
+    @Override
+    public ConversationResponse getConversationByIdAndCurrentPhone(String conversationId, String currentPhone) throws ExecutionException, InterruptedException {
+        DocumentReference docRef = db.collection(COLLECTION_NAME).document(conversationId);
+        ApiFuture<DocumentSnapshot> future = docRef.get();
+        DocumentSnapshot document = future.get();
+        Conversation conversation = document.toObject(Conversation.class);
+
+        List<User> memberList = new ArrayList<>();
+        conversation.getMembers().forEach(phone -> {
+            try {
+                Optional<User> user = userService.getUserDetailsByPhone(phone);
+                memberList.add(user.get());
+            } catch (ExecutionException | InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        List<DeleteConversationUser> deleteConversationUserList = conversation.getDeleteConversationUsers();
+
+        if(deleteConversationUserList.isEmpty()) {
+
+            return ConversationResponse.builder()
+                    .conversation(conversation)
+                    .memberDetails(memberList)
+                    .build();
+
+        } else if(checkContainDeleteConversationUser(deleteConversationUserList, currentPhone)) {
+            List<Message> messages = chatService.getListMessageAfterDeleteConversation(conversation, currentPhone);
+
+            if(!messages.isEmpty()) {
+                conversation.setMessages(messages);
+
+                return ConversationResponse.builder()
+                        .conversation(conversation)
+                        .memberDetails(memberList)
+                        .build();
+            }
+        } else {
+            return ConversationResponse.builder()
+                    .conversation(conversation)
+                    .memberDetails(memberList)
+                    .build();
+        }
+
+
+        return ConversationResponse
+                .builder()
+                .conversation(conversation)
+                .memberDetails(memberList)
                 .build();
     }
 

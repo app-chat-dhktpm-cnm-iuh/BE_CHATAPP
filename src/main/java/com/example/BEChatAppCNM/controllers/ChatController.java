@@ -59,8 +59,8 @@ public class ChatController {
 //    }
 
     @CrossOrigin("http://localhost:5173")
-    @GetMapping("user/conversations/{conversation_id}")
-    public ResponseEntity findConversationByID(@PathVariable String conversation_id) throws ExecutionException, InterruptedException {
+    @GetMapping("user/conversations/{conversation_id}/{currentPhone}")
+    public ResponseEntity findConversationByIDAndCurrentPhone(@PathVariable String conversation_id, @PathVariable String currentPhone) throws ExecutionException, InterruptedException {
         ConversationResponse conversation = conversationService.getConversationById(conversation_id);
         if(conversation != null) {
             return new ResponseEntity<>(conversation, HttpStatus.OK);
@@ -73,7 +73,7 @@ public class ChatController {
         messageRequest.getMembers().forEach(member_phone -> {
             messagingTemplate.convertAndSendToUser(member_phone, "/queue/messages", messageRequest);
             try {
-                ConversationResponse conversationResponse = conversationService.getConversationById(messageRequest.getConversation_id());
+                ConversationResponse conversationResponse = conversationService.getConversationByIdAndCurrentPhone(messageRequest.getConversation_id(), member_phone);
                 messagingTemplate.convertAndSendToUser(member_phone, "/queue/chat", conversationResponse);
             } catch (ExecutionException | InterruptedException e) {
                 throw new RuntimeException(e);
