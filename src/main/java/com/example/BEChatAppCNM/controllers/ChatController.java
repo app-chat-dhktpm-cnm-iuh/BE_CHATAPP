@@ -61,7 +61,7 @@ public class ChatController {
     @CrossOrigin("http://localhost:5173")
     @GetMapping("user/conversations/{conversation_id}/{currentPhone}")
     public ResponseEntity findConversationByIDAndCurrentPhone(@PathVariable String conversation_id, @PathVariable String currentPhone) throws ExecutionException, InterruptedException {
-        ConversationResponse conversation = conversationService.getConversationById(conversation_id);
+        ConversationResponse conversation = conversationService.getConversationByIdAndCurrentPhone(conversation_id, currentPhone);
         if(conversation != null) {
             return new ResponseEntity<>(conversation, HttpStatus.OK);
         } else return new ResponseEntity<>("Không tìm thấy hội thoại nào", HttpStatus.NOT_FOUND);
