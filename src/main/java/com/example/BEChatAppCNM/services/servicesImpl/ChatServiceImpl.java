@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
@@ -146,6 +147,10 @@ public class ChatServiceImpl implements ChatService {
         }
 
         for (int i = 0; i < conversation.getMessages().size(); i++) {
+            boolean result = conversation.getMessages().get(i).getSent_date_time().after(deleteConversationUser.getDeleted_at());
+            Date date_sent = conversation.getMessages().get(i).getSent_date_time();
+            Date delete_at = deleteConversationUser.getDeleted_at();
+
             if(conversation.getMessages().get(i).getSent_date_time().after(deleteConversationUser.getDeleted_at())) {
                 messageListReturn.add(conversation.getMessages().get(i));
             }

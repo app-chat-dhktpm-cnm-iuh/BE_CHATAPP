@@ -113,12 +113,13 @@ public class ConversationServiceImpl implements ConversationService {
     }
 
     public boolean checkContainDeleteConversationUser(List<DeleteConversationUser> deleteConversationUsers, String phoneUser) {
+        boolean result = false;
         for(DeleteConversationUser deleteConversationUser : deleteConversationUsers) {
             if(deleteConversationUser.getUser_phone().equals(phoneUser)) {
-                return true;
-            } else return false;
+                result = true;
+            } else result = false;
         }
-        return false;
+        return result;
     }
 
 
@@ -185,6 +186,11 @@ public class ConversationServiceImpl implements ConversationService {
                         .conversation(conversation)
                         .memberDetails(memberList)
                         .build();
+            } else {
+                return ConversationResponse.builder()
+                        .conversation(conversation)
+                        .memberDetails(memberList)
+                        .build();
             }
         } else {
             return ConversationResponse.builder()
@@ -192,13 +198,6 @@ public class ConversationServiceImpl implements ConversationService {
                     .memberDetails(memberList)
                     .build();
         }
-
-
-        return ConversationResponse
-                .builder()
-                .conversation(conversation)
-                .memberDetails(memberList)
-                .build();
     }
 
 //    @Override
