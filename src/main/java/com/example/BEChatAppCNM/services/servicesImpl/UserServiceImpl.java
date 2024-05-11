@@ -82,13 +82,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void updateUserDetails(User user) {
-        if(!user.getName().isEmpty()) {
+        if(user.getName() != null) {
             db.collection(COLLECTION_USER)
                     .document(user.getUser_id())
                     .update("name", user.getName());
         }
 
-        if(!user.getAvatar_url().isEmpty()) {
+        if(user.getAvatar_url() != null) {
             db.collection(COLLECTION_USER)
                     .document(user.getUser_id())
                     .update("avatar_url", user.getAvatar_url());
