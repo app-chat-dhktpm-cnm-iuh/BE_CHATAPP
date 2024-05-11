@@ -30,7 +30,7 @@ public class ChatServiceImpl implements ChatService {
     private ConversationService conversationService;
 
     @Override
-    public void saveMessage(MessageRequest messageRequest) throws ExecutionException, InterruptedException {
+    public Message saveMessage(MessageRequest messageRequest) throws ExecutionException, InterruptedException {
         CollectionReference collectionReference = db.collection(COLLECTION_NAME);
         ConversationResponse conversationResponse = conversationService.getConversationById(messageRequest.getConversation_id());
         List<String> deleteMessageUsers = new ArrayList<>();
@@ -53,6 +53,7 @@ public class ChatServiceImpl implements ChatService {
         conversationResponse.getConversation().setUpdated_at(messageRequest.getSent_date_time());
 
         collectionReference.document(messageRequest.getConversation_id()).set(conversationResponse.getConversation());
+        return message;
     }
 
     @Override

@@ -178,20 +178,25 @@ public class ConversationServiceImpl implements ConversationService {
 
         } else if(checkContainDeleteConversationUser(deleteConversationUserList, currentPhone)) {
             List<Message> messages = chatService.getListMessageAfterDeleteConversation(conversation, currentPhone);
+            conversation.setMessages(messages);
 
-            if(!messages.isEmpty()) {
-                conversation.setMessages(messages);
-
-                return ConversationResponse.builder()
-                        .conversation(conversation)
-                        .memberDetails(memberList)
-                        .build();
-            } else {
-                return ConversationResponse.builder()
-                        .conversation(conversation)
-                        .memberDetails(memberList)
-                        .build();
-            }
+            return ConversationResponse.builder()
+                    .conversation(conversation)
+                    .memberDetails(memberList)
+                    .build();
+//            if(!messages.isEmpty()) {
+//                conversation.setMessages(messages);
+//
+//                return ConversationResponse.builder()
+//                        .conversation(conversation)
+//                        .memberDetails(memberList)
+//                        .build();
+//            } else {
+//                return ConversationResponse.builder()
+//                        .conversation(conversation)
+//                        .memberDetails(memberList)
+//                        .build();
+//            }
         } else {
             return ConversationResponse.builder()
                     .conversation(conversation)

@@ -1,6 +1,7 @@
 package com.example.BEChatAppCNM.controllers;
 
 import com.example.BEChatAppCNM.entities.Conversation;
+import com.example.BEChatAppCNM.entities.Message;
 import com.example.BEChatAppCNM.entities.User;
 import com.example.BEChatAppCNM.entities.dto.ConversationResponse;
 import com.example.BEChatAppCNM.entities.dto.MessageRequest;
@@ -69,12 +70,20 @@ public class ChatController {
 
     @MessageMapping("/chat")
     public MessageRequest saveMessage(MessageRequest messageRequest) throws ExecutionException, InterruptedException {
-        chatService.saveMessage(messageRequest);
+        Message message = chatService.saveMessage(messageRequest);
         messageRequest.getMembers().forEach(member_phone -> {
             messagingTemplate.convertAndSendToUser(member_phone, "/queue/messages", messageRequest);
             try {
                 ConversationResponse conversationResponse = conversationService.getConversationByIdAndCurrentPhone(messageRequest.getConversation_id(), member_phone);
-                messagingTemplate.convertAndSendToUser(member_phone, "/queue/chat", conversationResponse);
+
+                if(conversationResponse.getConversation().getMessages().isEmpty()) {
+                    List<Message> messages = new ArrayList<>();
+                    messages.add(message);
+                    conversationResponse.getConversation().setMessages(messages);
+                    messagingTemplate.convertAndSendToUser(member_phone, "/queue/chat", conversationResponse);
+                } else {
+                    messagingTemplate.convertAndSendToUser(member_phone, "/queue/chat", conversationResponse);
+                }
             } catch (ExecutionException | InterruptedException e) {
                 throw new RuntimeException(e);
             }
