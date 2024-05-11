@@ -62,7 +62,7 @@ public class UserServiceImpl implements UserService {
 
        LoginRegisterResponse response = LoginRegisterResponse
                .builder()
-               .user(user)
+               .user(userTemp)
                .token(token).build();
         return response;
     }
@@ -82,9 +82,28 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void updateUserDetails(User user) {
+        if(!user.getName().isEmpty()) {
+            db.collection(COLLECTION_USER)
+                    .document(user.getUser_id())
+                    .update("name", user.getName());
+        }
+
+        if(!user.getAvatar_url().isEmpty()) {
+            db.collection(COLLECTION_USER)
+                    .document(user.getUser_id())
+                    .update("avatar_url", user.getAvatar_url());
+        }
+
         db.collection(COLLECTION_USER)
                 .document(user.getUser_id())
-                .set(user);
+                .update("gender", user.isGender());
+
+        if(user.getDate_of_birth() != null) {
+            db.collection(COLLECTION_USER)
+                    .document(user.getUser_id())
+                    .update("date_of_birth", user.getDate_of_birth());
+        }
+
     }
 
     @Override

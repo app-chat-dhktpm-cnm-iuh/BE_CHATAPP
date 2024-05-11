@@ -32,6 +32,8 @@ public class UserController {
     public ResponseEntity register(@RequestBody User user) throws ExecutionException, InterruptedException {
         try {
             LoginRegisterResponse result = userService.saveUser(user);
+            User userReturn = userService.getUserDetailsByPhone(user.getPhone()).orElseThrow();
+            result.setUser(userReturn);
             return  new ResponseEntity<>(result, HttpStatus.OK);
         } catch (Exception e) {
             e.printStackTrace();
