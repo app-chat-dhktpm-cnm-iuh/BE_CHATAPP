@@ -90,7 +90,8 @@ public class UserController {
     public ResponseEntity updateUserDetails(@RequestBody User user) {
         try {
             userService.updateUserDetails(user);
-            return new ResponseEntity<>(HttpStatus.OK);
+            User userReturn = userService.getUserDetailsByID(user.getUser_id());
+            return new ResponseEntity<>(userReturn, HttpStatus.OK);
         } catch (Exception e) {
             e.printStackTrace();
         }

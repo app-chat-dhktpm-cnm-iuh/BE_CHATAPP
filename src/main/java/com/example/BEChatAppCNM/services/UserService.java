@@ -12,6 +12,9 @@ import java.util.concurrent.ExecutionException;
 public interface UserService {
     public LoginRegisterResponse saveUser(User user) throws ExecutionException, InterruptedException;
     public Optional<User> getUserDetailsByPhone(String phone_number) throws ExecutionException, InterruptedException;
+
+    public User getUserDetailsByID(String user_id) throws ExecutionException, InterruptedException;
+
     public void updateUserDetails(User user);
     public boolean checkExistPhoneNumber(String phone_number) throws ExecutionException, InterruptedException;
     public LoginRegisterResponse checkAccountLogin(User user) throws ExecutionException, InterruptedException;
