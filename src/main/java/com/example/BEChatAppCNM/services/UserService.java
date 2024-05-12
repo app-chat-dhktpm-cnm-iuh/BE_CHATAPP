@@ -4,6 +4,7 @@ import com.example.BEChatAppCNM.entities.dto.ConversationResponse;
 import com.example.BEChatAppCNM.entities.dto.FriendRequest;
 import com.example.BEChatAppCNM.entities.User;
 import com.example.BEChatAppCNM.entities.dto.LoginRegisterResponse;
+import com.google.cloud.firestore.DocumentSnapshot;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,7 +16,7 @@ public interface UserService {
 
     public User getUserDetailsByID(String user_id) throws ExecutionException, InterruptedException;
 
-    public void updateUserDetails(User user);
+    public void updateUserDetails(User user) throws ExecutionException, InterruptedException;
     public boolean checkExistPhoneNumber(String phone_number) throws ExecutionException, InterruptedException;
     public LoginRegisterResponse checkAccountLogin(User user) throws ExecutionException, InterruptedException;
 

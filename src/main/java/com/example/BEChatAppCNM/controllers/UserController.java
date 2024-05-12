@@ -5,6 +5,7 @@ import com.example.BEChatAppCNM.entities.dto.FriendRequest;
 import com.example.BEChatAppCNM.entities.dto.LoginRegisterResponse;
 import com.example.BEChatAppCNM.entities.User;
 import com.example.BEChatAppCNM.services.UserService;
+import com.google.cloud.firestore.DocumentSnapshot;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequiredArgsConstructor
@@ -90,6 +92,7 @@ public class UserController {
     public ResponseEntity updateUserDetails(@RequestBody User user) {
         try {
             userService.updateUserDetails(user);
+            TimeUnit.SECONDS.sleep(2);
             User userReturn = userService.getUserDetailsByID(user.getUser_id());
             return new ResponseEntity<>(userReturn, HttpStatus.OK);
         } catch (Exception e) {

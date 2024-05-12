@@ -88,7 +88,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void updateUserDetails(User user) {
+    public void updateUserDetails(User user) throws ExecutionException, InterruptedException {
         if(user.getName() != null) {
             db.collection(COLLECTION_USER)
                     .document(user.getUser_id())
@@ -110,6 +110,8 @@ public class UserServiceImpl implements UserService {
                     .document(user.getUser_id())
                     .update("date_of_birth", user.getDate_of_birth());
         }
+
+//        return getUserDetailsByID(user.getUser_id());
     }
 
 
