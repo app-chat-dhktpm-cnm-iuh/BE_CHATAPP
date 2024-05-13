@@ -16,7 +16,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
@@ -154,6 +156,24 @@ public class UserServiceImpl implements UserService {
         List<String> members = new ArrayList<>();
         members.add(friendRequest.getSender_phone());
         members.add(friendRequest.getReceiver_phone());
+
+        UUID messageId = UUID.randomUUID();
+        List<String> phoneDeleteList = new ArrayList<>();
+        List<String> images = new ArrayList<>();
+        List<Attach> attaches = new ArrayList<>();
+
+        Message message = Message
+                .builder()
+                .message_id(messageId.toString())
+                .phoneDeleteList(phoneDeleteList)
+                .images(images)
+                .sent_date_time(Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant()))
+                .attaches(attaches)
+                .is_notification(true)
+                .content("Hãy trò chuyện vui vẻ nào")
+                .build();
+
+        messages.add(message);
 
         Conversation conversation = Conversation
                 .builder()

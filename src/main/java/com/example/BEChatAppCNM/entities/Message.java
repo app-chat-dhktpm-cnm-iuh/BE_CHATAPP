@@ -15,9 +15,11 @@ public class Message {
     private String sender_phone;
     private String sender_name;
     private String content;
+    private String user_avatar_url;
     private List<String> images;
     private List<Attach> attaches;
     private Date sent_date_time;
     private List<String> phoneDeleteList;
     private boolean is_read;
+    private boolean is_notification;
 }
