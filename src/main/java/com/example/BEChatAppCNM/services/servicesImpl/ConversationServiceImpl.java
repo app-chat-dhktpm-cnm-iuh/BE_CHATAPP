@@ -35,9 +35,6 @@ public class ConversationServiceImpl implements ConversationService {
 
         List<User> userList = new ArrayList<>();
 
-        conversation.setConversation_id(documentId);
-        collectionReference.document(documentId).create(conversation);
-        List<Message> messages = new ArrayList<>();
         UUID messageId = UUID.randomUUID();
         List<String> phoneDeleteList = new ArrayList<>();
         List<String> images = new ArrayList<>();
@@ -54,7 +51,10 @@ public class ConversationServiceImpl implements ConversationService {
                 .content("Hãy trò chuyện vui vẻ nào")
                 .build();
 
-        messages.add(message);
+        conversation.setConversation_id(documentId);
+        conversation.getMessages().add(message);
+
+        collectionReference.document(documentId).create(conversation);
 
         conversation.getMembers().forEach(phone -> {
             try {
@@ -65,15 +65,11 @@ public class ConversationServiceImpl implements ConversationService {
             }
         });
 
-        conversation.setMessages(messages);
-
-        ConversationResponse conversationResponse = ConversationResponse
+        return ConversationResponse
                 .builder()
                 .conversation(conversation)
                 .memberDetails(userList)
                 .build();
-
-        return conversationResponse;
     }
 
     @Override
