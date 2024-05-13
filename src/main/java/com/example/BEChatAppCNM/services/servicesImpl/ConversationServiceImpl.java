@@ -1,9 +1,6 @@
 package com.example.BEChatAppCNM.services.servicesImpl;
 
-import com.example.BEChatAppCNM.entities.Conversation;
-import com.example.BEChatAppCNM.entities.DeleteConversationUser;
-import com.example.BEChatAppCNM.entities.Message;
-import com.example.BEChatAppCNM.entities.User;
+import com.example.BEChatAppCNM.entities.*;
 import com.example.BEChatAppCNM.entities.dto.ConversationResponse;
 import com.example.BEChatAppCNM.services.ConversationService;
 import com.google.api.core.ApiFuture;
@@ -40,6 +37,24 @@ public class ConversationServiceImpl implements ConversationService {
 
         conversation.setConversation_id(documentId);
         collectionReference.document(documentId).create(conversation);
+        List<Message> messages = new ArrayList<>();
+        UUID messageId = UUID.randomUUID();
+        List<String> phoneDeleteList = new ArrayList<>();
+        List<String> images = new ArrayList<>();
+        List<Attach> attaches = new ArrayList<>();
+
+        Message message = Message
+                .builder()
+                .message_id(messageId.toString())
+                .phoneDeleteList(phoneDeleteList)
+                .images(images)
+                .sent_date_time(Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant()))
+                .attaches(attaches)
+                .is_notification(true)
+                .content("Hãy trò chuyện vui vẻ nào")
+                .build();
+
+        messages.add(message);
 
         conversation.getMembers().forEach(phone -> {
             try {
@@ -49,6 +64,8 @@ public class ConversationServiceImpl implements ConversationService {
                 throw new RuntimeException(e);
             }
         });
+
+        conversation.setMessages(messages);
 
         ConversationResponse conversationResponse = ConversationResponse
                 .builder()
