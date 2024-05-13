@@ -15,7 +15,7 @@ public class Message {
     private String sender_phone;
     private String sender_name;
     private String content;
-    private String user_avatar_url;
+    private String sender_avatar_url;
     private List<String> images;
     private List<Attach> attaches;
     private Date sent_date_time;
