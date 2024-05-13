@@ -45,6 +45,7 @@ public class ChatServiceImpl implements ChatService {
                 .images(messageRequest.getImages())
                 .attaches(messageRequest.getAttaches())
                 .content(messageRequest.getContent())
+                .sender_avatar_url(messageRequest.getSender_avatar_url())
                 .phoneDeleteList(deleteMessageUsers)
                 .sent_date_time(messageRequest.getSent_date_time())
                 .build();

@@ -20,6 +20,7 @@ public class MessageRequest {
     private List<String> images;
     private List<Attach> attaches;
     private String sender_phone;
+    private String sender_avatar_url;
     private Date sent_date_time;
     private boolean is_read;
     private  boolean is_deleted;
