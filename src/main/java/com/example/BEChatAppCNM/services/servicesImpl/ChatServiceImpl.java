@@ -142,19 +142,23 @@ public class ChatServiceImpl implements ChatService {
         DeleteConversationUser deleteConversationUser = new DeleteConversationUser();
         List<DeleteConversationUser> deleteConversationUserList = conversation.getDeleteConversationUsers();
 
-        for (int i = 0; i < deleteConversationUserList.size(); i++) {
-            if(deleteConversationUserList.get(i).getUser_phone().equals(userPhone)) {
-                deleteConversationUser = deleteConversationUserList.get(i);
+        if(!deleteConversationUserList.isEmpty()) {
+            for (DeleteConversationUser conversationUser : deleteConversationUserList) {
+                if (conversationUser.getUser_phone().equals(userPhone)) {
+                    deleteConversationUser = conversationUser;
+                }
             }
-        }
 
-        for (int i = 0; i < conversation.getMessages().size(); i++) {
-            boolean result = conversation.getMessages().get(i).getSent_date_time().after(deleteConversationUser.getDeleted_at());
-            Date date_sent = conversation.getMessages().get(i).getSent_date_time();
-            Date delete_at = deleteConversationUser.getDeleted_at();
-
-            if(conversation.getMessages().get(i).getSent_date_time().after(deleteConversationUser.getDeleted_at())) {
-                messageListReturn.add(conversation.getMessages().get(i));
+            for (int i = 0; i < conversation.getMessages().size(); i++) {
+                if(conversation.getMessages().get(i).getSent_date_time().after(deleteConversationUser.getDeleted_at()) && !conversation.getMessages().get(i).getPhoneDeleteList().contains(userPhone)) {
+                    messageListReturn.add(conversation.getMessages().get(i));
+                }
+            }
+        } else {
+            for (int i = 0; i < conversation.getMessages().size(); i++) {
+                if(!conversation.getMessages().get(i).getPhoneDeleteList().contains(userPhone)) {
+                    messageListReturn.add(conversation.getMessages().get(i));
+                }
             }
         }
 

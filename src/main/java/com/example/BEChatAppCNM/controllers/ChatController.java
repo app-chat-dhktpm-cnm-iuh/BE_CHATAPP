@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequiredArgsConstructor
@@ -74,6 +75,7 @@ public class ChatController {
         messageRequest.getMembers().forEach(member_phone -> {
             messagingTemplate.convertAndSendToUser(member_phone, "/queue/messages", messageRequest);
             try {
+
                 ConversationResponse conversationResponse = conversationService.getConversationByIdAndCurrentPhone(messageRequest.getConversation_id(), member_phone);
 
                 if(conversationResponse.getConversation().getMessages().isEmpty()) {

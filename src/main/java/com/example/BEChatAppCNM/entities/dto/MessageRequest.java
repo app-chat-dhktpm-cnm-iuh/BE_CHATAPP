@@ -23,5 +23,4 @@ public class MessageRequest {
     private String sender_avatar_url;
     private Date sent_date_time;
     private boolean is_read;
-    private  boolean is_deleted;
 }

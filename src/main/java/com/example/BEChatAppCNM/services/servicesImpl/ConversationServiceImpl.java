@@ -96,6 +96,8 @@ public class ConversationServiceImpl implements ConversationService {
                     });
 
                     if(deleteConversationUserList.isEmpty()) {
+                        List<Message> messages = chatService.getListMessageAfterDeleteConversation(conversation, creator_phone);
+                        conversation.setMessages(messages);
                         ConversationResponse conversationResponse = ConversationResponse.builder()
                                 .conversation(conversation)
                                 .memberDetails(userList)
@@ -183,7 +185,8 @@ public class ConversationServiceImpl implements ConversationService {
         List<DeleteConversationUser> deleteConversationUserList = conversation.getDeleteConversationUsers();
 
         if(deleteConversationUserList.isEmpty()) {
-
+            List<Message> messages = chatService.getListMessageAfterDeleteConversation(conversation, currentPhone);
+            conversation.setMessages(messages);
             return ConversationResponse.builder()
                     .conversation(conversation)
                     .memberDetails(memberList)
@@ -260,6 +263,9 @@ public class ConversationServiceImpl implements ConversationService {
         Conversation conversation = conversationResponse.getConversation();
         List<String> deleteConversationUserPhone = new ArrayList<>();
 
+        Calendar calendar = Calendar.getInstance();
+        Date deleted_at = calendar.getTime();
+
         for (DeleteConversationUser deleteConversationUserItem : conversation.getDeleteConversationUsers()) {
             deleteConversationUserPhone.add(deleteConversationUserItem.getUser_phone());
         }
@@ -267,7 +273,7 @@ public class ConversationServiceImpl implements ConversationService {
         DeleteConversationUser deleteConversationUser = DeleteConversationUser
                 .builder()
                 .user_phone(currentPhone)
-                .deleted_at(Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant()))
+                .deleted_at(deleted_at)
                 .build();
 
         if(!conversation.getDeleteConversationUsers().isEmpty()) {
