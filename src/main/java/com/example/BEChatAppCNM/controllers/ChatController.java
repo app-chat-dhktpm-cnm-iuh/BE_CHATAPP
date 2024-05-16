@@ -73,7 +73,7 @@ public class ChatController {
     public MessageRequest saveMessage(MessageRequest messageRequest) throws ExecutionException, InterruptedException {
         Message message = chatService.saveMessage(messageRequest);
         messageRequest.getMembers().forEach(member_phone -> {
-            messagingTemplate.convertAndSendToUser(member_phone, "/queue/messages", messageRequest);
+            messagingTemplate.convertAndSendToUser(member_phone, "/queue/messages", message);
             try {
 
                 ConversationResponse conversationResponse = conversationService.getConversationByIdAndCurrentPhone(messageRequest.getConversation_id(), member_phone);
