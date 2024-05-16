@@ -1,9 +1,6 @@
 package com.example.BEChatAppCNM.entities.dto;
 import com.example.BEChatAppCNM.entities.Attach;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 import java.util.Date;
 import java.util.List;
@@ -12,15 +9,19 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
+@Builder
 public class MessageRequest {
     private String conversation_id;
     private List<String> members;
-    private String content;
+    private String message_id;
+    private String sender_phone;
     private String sender_name;
+    private String content;
+    private String sender_avatar_url;
     private List<String> images;
     private List<Attach> attaches;
-    private String sender_phone;
-    private String sender_avatar_url;
     private Date sent_date_time;
+    private List<String> phoneDeleteList;
     private boolean is_read;
+    private boolean is_notification;
 }

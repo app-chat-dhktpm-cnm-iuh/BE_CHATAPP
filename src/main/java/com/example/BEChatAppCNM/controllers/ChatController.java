@@ -72,8 +72,23 @@ public class ChatController {
     @MessageMapping("/chat")
     public MessageRequest saveMessage(MessageRequest messageRequest) throws ExecutionException, InterruptedException {
         Message message = chatService.saveMessage(messageRequest);
+
+        MessageRequest messageReturn = MessageRequest.builder()
+                .conversation_id(messageRequest.getConversation_id())
+                .message_id(message.getMessage_id().toString())
+                .sender_name(message.getSender_name())
+                .sender_phone(message.getSender_phone())
+                .is_read(message.is_read())
+                .images(message.getImages())
+                .attaches(message.getAttaches())
+                .content(message.getContent())
+                .sender_avatar_url(message.getSender_avatar_url())
+                .phoneDeleteList(message.getPhoneDeleteList())
+                .sent_date_time(message.getSent_date_time())
+                .build();
+
         messageRequest.getMembers().forEach(member_phone -> {
-            messagingTemplate.convertAndSendToUser(member_phone, "/queue/messages", message);
+            messagingTemplate.convertAndSendToUser(member_phone, "/queue/messages", messageReturn);
             try {
 
                 ConversationResponse conversationResponse = conversationService.getConversationByIdAndCurrentPhone(messageRequest.getConversation_id(), member_phone);

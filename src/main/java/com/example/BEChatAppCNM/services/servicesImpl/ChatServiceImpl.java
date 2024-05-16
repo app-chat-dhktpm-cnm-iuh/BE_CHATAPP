@@ -50,6 +50,8 @@ public class ChatServiceImpl implements ChatService {
                 .sent_date_time(messageRequest.getSent_date_time())
                 .build();
 
+
+
         conversationResponse.getConversation().getMessages().add(message);
         conversationResponse.getConversation().setUpdated_at(messageRequest.getSent_date_time());
 
