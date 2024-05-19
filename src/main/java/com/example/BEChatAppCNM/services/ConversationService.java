@@ -13,7 +13,7 @@ public interface ConversationService {
     public ConversationResponse getConversationById(String conversationId) throws ExecutionException, InterruptedException;
     public ConversationResponse getConversationByIdAndCurrentPhone(String conversationId, String currentPhone) throws ExecutionException, InterruptedException;
 
-//    public ConversationResponse getConversationBySenderPhoneAndReceiverPhone(String senderPhone, String receiverPhone) throws ExecutionException, InterruptedException;
+    public ConversationResponse getConversationBySenderPhoneAndReceiverPhone(String currentPhone, String userPhone) throws ExecutionException, InterruptedException;
 
     public void deleteConversation(String conversationId, String currentPhone) throws ExecutionException, InterruptedException;
 }

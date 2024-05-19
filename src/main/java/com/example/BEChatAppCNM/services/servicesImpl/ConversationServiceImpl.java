@@ -145,7 +145,6 @@ public class ConversationServiceImpl implements ConversationService {
         DocumentSnapshot document = future.get();
         Conversation conversation = document.toObject(Conversation.class);
 
-//        conversation.setConversation_id(document.getId());
 
         List<User> meberList = new ArrayList<>();
         conversation.getMembers().forEach(phone -> {
@@ -200,19 +199,6 @@ public class ConversationServiceImpl implements ConversationService {
                     .conversation(conversation)
                     .memberDetails(memberList)
                     .build();
-//            if(!messages.isEmpty()) {
-//                conversation.setMessages(messages);
-//
-//                return ConversationResponse.builder()
-//                        .conversation(conversation)
-//                        .memberDetails(memberList)
-//                        .build();
-//            } else {
-//                return ConversationResponse.builder()
-//                        .conversation(conversation)
-//                        .memberDetails(memberList)
-//                        .build();
-//            }
         } else {
             return ConversationResponse.builder()
                     .conversation(conversation)
@@ -221,40 +207,66 @@ public class ConversationServiceImpl implements ConversationService {
         }
     }
 
-//    @Override
-//    public ConversationResponse getConversationBySenderPhoneAndReceiverPhone(String senderPhone, String receiverPhone) throws ExecutionException, InterruptedException {
-//        CollectionReference collectionReference = db.collection(COLLECTION_NAME);
-//
-//        List<String> members = new ArrayList<>();
-//        members.add(senderPhone);
-//        members.add(receiverPhone);
-//
-//        ConversationResponse conversationResponse = new ConversationResponse();
-//        List<User> mems = new ArrayList<>();
-//
-//        QuerySnapshot documentSnapshot =  collectionReference
-//                .whereIn("members", members)
-//                .get()
-//                .get();
-//        System.out.println(documentSnapshot);
-//                .forEach(conversation -> {
-//                    Conversation conversationTemp = conversation.toObject(Conversation.class);
-//                    if(conversationTemp.getMembers().size() == 2) {
-//                        conversationResponse.setConversation(conversationTemp);
-//                        members.forEach(phone -> {
-//                            try {
-//                                User mem = userService.getUserDetailsByPhone(phone).get();
-//                                mems.add(mem);
-//                            } catch (ExecutionException | InterruptedException e) {
-//                                throw new RuntimeException(e);
-//                            }
-//                        });
-//
-//                        conversationResponse.setMemberDetails(mems);
-//                    }
-//                });
-//        return conversationResponse;
-//    }
+    @Override
+    public ConversationResponse getConversationBySenderPhoneAndReceiverPhone(String currentPhone, String userPhone) throws ExecutionException, InterruptedException {
+        CollectionReference collectionReference = db.collection(COLLECTION_NAME);
+
+        List<String> members = new ArrayList<>();
+        members.add(currentPhone);
+        members.add(userPhone);
+
+        ConversationResponse conversationResponse = new ConversationResponse();
+        List<User> memberList = new ArrayList<>();
+
+        QuerySnapshot documentSnapshot =  collectionReference
+                .whereArrayContainsAny("members", members)
+                .get()
+                .get();
+        if(!documentSnapshot.getDocuments().isEmpty()) {
+            for(QueryDocumentSnapshot document : documentSnapshot) {
+                Conversation conversationTemp = document.toObject(Conversation.class);
+                if(conversationTemp.getMembers().size() == 2 && conversationTemp.getMembers().containsAll(members)) {
+                    List<DeleteConversationUser> deleteConversationUserList = conversationTemp.getDeleteConversationUsers();
+
+                    members.forEach(phone -> {
+                        try {
+                            User mem = userService.getUserDetailsByPhone(phone).get();
+                            memberList.add(mem);
+                        } catch (ExecutionException | InterruptedException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
+
+                    if(deleteConversationUserList.isEmpty()) {
+                        List<Message> messages = chatService.getListMessageAfterDeleteConversation(conversationTemp, currentPhone);
+                        conversationTemp.setMessages(messages);
+                        return ConversationResponse.builder()
+                                .conversation(conversationTemp)
+                                .memberDetails(memberList)
+                                .build();
+
+                    } else if(checkContainDeleteConversationUser(deleteConversationUserList, currentPhone)) {
+                        List<Message> messages = chatService.getListMessageAfterDeleteConversation(conversationTemp, currentPhone);
+                        conversationTemp.setMessages(messages);
+
+                        return ConversationResponse.builder()
+                                .conversation(conversationTemp)
+                                .memberDetails(memberList)
+                                .build();
+                    } else {
+                        return ConversationResponse.builder()
+                                .conversation(conversationTemp)
+                                .memberDetails(memberList)
+                                .build();
+                    }
+                }
+            }
+
+        } else {
+            return null;
+        }
+        return conversationResponse;
+    }
 
     @Override
     public void deleteConversation(String conversationId, String currentPhone) throws ExecutionException, InterruptedException {

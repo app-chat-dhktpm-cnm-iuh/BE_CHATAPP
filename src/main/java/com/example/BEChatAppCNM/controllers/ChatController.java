@@ -45,20 +45,20 @@ public class ChatController {
     @GetMapping("user/messages/{creator_phone}")
     public ResponseEntity findListConversation(@PathVariable String creator_phone) throws ExecutionException, InterruptedException {
         List<ConversationResponse> conversationList = conversationService.findListConversationByCreatorPhone(creator_phone);
-        if(conversationList.size() != 0) {
+        if(!conversationList.isEmpty()) {
             return new ResponseEntity<>(conversationList, HttpStatus.OK);
         } else return new ResponseEntity<>("Không tìm thấy hội thoại nào", HttpStatus.NOT_FOUND);
     }
 
-//    @CrossOrigin("http://localhost:5173")
-//    @GetMapping("user/message/{senderPhone}/{receiverPhone}")
-//    public ResponseEntity findConversationBySenderPhoneAndReceiverPhone(@PathVariable String senderPhone, @PathVariable String receiverPhone) throws ExecutionException, InterruptedException {
-//        ConversationResponse conversationResponse = conversationService.getConversationBySenderPhoneAndReceiverPhone(senderPhone, receiverPhone);
-//
-//        if(conversationResponse != null) {
-//            return new ResponseEntity<>(conversationResponse, HttpStatus.OK);
-//        } return new ResponseEntity<>("Không tìm thấy", HttpStatus.NOT_FOUND);
-//    }
+    @CrossOrigin("http://localhost:5173")
+    @GetMapping("user/message/{currentPhone}/{userPhone}")
+    public ResponseEntity findConversationByCurrentPhoneAndUserPhone(@PathVariable String currentPhone, @PathVariable String userPhone) throws ExecutionException, InterruptedException {
+        ConversationResponse conversationResponse = conversationService.getConversationBySenderPhoneAndReceiverPhone(currentPhone, userPhone);
+
+            if(conversationResponse.getConversation() != null) {
+            return new ResponseEntity<>(conversationResponse, HttpStatus.OK);
+        } return new ResponseEntity<>("Không tìm thấy", HttpStatus.NOT_FOUND);
+    }
 
     @CrossOrigin("http://localhost:5173")
     @GetMapping("user/conversations/{conversation_id}/{currentPhone}")
@@ -75,7 +75,7 @@ public class ChatController {
 
         MessageRequest messageReturn = MessageRequest.builder()
                 .conversation_id(messageRequest.getConversation_id())
-                .message_id(message.getMessage_id().toString())
+                .message_id(message.getMessage_id())
                 .sender_name(message.getSender_name())
                 .sender_phone(message.getSender_phone())
                 .is_read(message.is_read())
