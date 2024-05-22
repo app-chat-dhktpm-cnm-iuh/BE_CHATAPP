@@ -13,10 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -81,5 +78,16 @@ public class FriendController {
             messagingTemplate.convertAndSendToUser(friendRequest.getReceiver_phone(), "/queue/friend-reply", friendRequest);
             return friendRequest;
         }
+    }
+
+    @PostMapping("user/unfriend/{currentPhone}/{friendPhone}")
+    public void unfriendRequest(@PathVariable String currentPhone, @PathVariable String friendPhone) throws ExecutionException, InterruptedException {
+        friendService.unfriendRequest(currentPhone, friendPhone);
+
+        User currentUser = userService.getUserDetailsByPhone(currentPhone).get();
+        User friendUser = userService.getUserDetailsByPhone(friendPhone).get();
+
+        messagingTemplate.convertAndSendToUser(currentUser.getPhone(), "/queue/unfriend", friendUser);
+        messagingTemplate.convertAndSendToUser(friendUser.getPhone(), "/queue/unfriend", currentUser);
     }
 }

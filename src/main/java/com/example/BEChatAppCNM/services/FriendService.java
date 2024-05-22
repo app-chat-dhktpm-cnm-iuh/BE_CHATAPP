@@ -11,5 +11,7 @@ public interface FriendService {
     public List<FriendRequest> getListFriendRequest(String phone) throws ExecutionException, InterruptedException;
 
     public void deleteFriendRequest(String request_id);
+
+    public void unfriendRequest(String currentPhone, String friendPhone) throws ExecutionException, InterruptedException;
 }
 
