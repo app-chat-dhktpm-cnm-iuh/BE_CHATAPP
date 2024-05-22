@@ -16,4 +16,6 @@ public interface ConversationService {
     public ConversationResponse getConversationBySenderPhoneAndReceiverPhone(String currentPhone, String userPhone) throws ExecutionException, InterruptedException;
 
     public void deleteConversation(String conversationId, String currentPhone) throws ExecutionException, InterruptedException;
+
+    public void updateGroupChatDetail(Conversation conversation) throws ExecutionException, InterruptedException;
 }

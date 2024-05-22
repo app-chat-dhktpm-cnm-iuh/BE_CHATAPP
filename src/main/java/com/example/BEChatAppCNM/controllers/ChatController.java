@@ -41,6 +41,21 @@ public class ChatController {
         return conversationResult;
     }
 
+    @PostMapping("user/groupchat/update")
+    public ConversationResponse updateGroupChetDetail(@RequestBody Conversation conversation) throws ExecutionException, InterruptedException {
+        conversationService.updateGroupChatDetail(conversation);
+
+        TimeUnit.SECONDS.sleep(2);
+
+        ConversationResponse conversationResponse = conversationService.getConversationById(conversation.getConversation_id());
+
+        conversationResponse.getConversation().getMembers().forEach((memberPhone) -> {
+            messagingTemplate.convertAndSendToUser(memberPhone, "queue/notify-groupchat", conversationResponse);
+        });
+
+        return  conversationResponse;
+    }
+
     @CrossOrigin("http://localhost:5173")
     @GetMapping("user/messages/{creator_phone}")
     public ResponseEntity findListConversation(@PathVariable String creator_phone) throws ExecutionException, InterruptedException {
@@ -79,6 +94,7 @@ public class ChatController {
                 .sender_name(message.getSender_name())
                 .sender_phone(message.getSender_phone())
                 .is_read(message.is_read())
+                .members(messageRequest.getMembers())
                 .images(message.getImages())
                 .attaches(message.getAttaches())
                 .content(message.getContent())

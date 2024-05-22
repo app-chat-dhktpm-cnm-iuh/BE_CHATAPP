@@ -2,6 +2,7 @@ package com.example.BEChatAppCNM.services.servicesImpl;
 
 import com.example.BEChatAppCNM.entities.*;
 import com.example.BEChatAppCNM.entities.dto.ConversationResponse;
+import com.example.BEChatAppCNM.entities.dto.MessageRequest;
 import com.example.BEChatAppCNM.services.ConversationService;
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.*;
@@ -20,7 +21,7 @@ public class ConversationServiceImpl implements ConversationService {
     private static final String COLLECTION_NAME = "conversations";
 
     private final UserServiceImpl userService;
-    private  final ChatServiceImpl chatService;
+    private final ChatServiceImpl chatService;
     Firestore db = FirestoreClient.getFirestore();
 
     public ConversationServiceImpl(@Lazy UserServiceImpl userService, @Lazy ChatServiceImpl chatService) {
@@ -95,7 +96,7 @@ public class ConversationServiceImpl implements ConversationService {
                         }
                     });
 
-                    if(deleteConversationUserList.isEmpty()) {
+                    if (deleteConversationUserList.isEmpty()) {
                         List<Message> messages = chatService.getListMessageAfterDeleteConversation(conversation, creator_phone);
                         conversation.setMessages(messages);
                         ConversationResponse conversationResponse = ConversationResponse.builder()
@@ -103,10 +104,10 @@ public class ConversationServiceImpl implements ConversationService {
                                 .memberDetails(userList)
                                 .build();
                         conversationResponses.add(conversationResponse);
-                    } else if(checkContainDeleteConversationUser(deleteConversationUserList, creator_phone)) {
+                    } else if (checkContainDeleteConversationUser(deleteConversationUserList, creator_phone)) {
                         List<Message> messages = chatService.getListMessageAfterDeleteConversation(conversation, creator_phone);
 
-                        if(!messages.isEmpty()) {
+                        if (!messages.isEmpty()) {
                             conversation.setMessages(messages);
 
                             ConversationResponse conversationResponse = ConversationResponse.builder()
@@ -129,8 +130,8 @@ public class ConversationServiceImpl implements ConversationService {
 
     public boolean checkContainDeleteConversationUser(List<DeleteConversationUser> deleteConversationUsers, String phoneUser) {
         boolean result = false;
-        for(DeleteConversationUser deleteConversationUser : deleteConversationUsers) {
-            if(deleteConversationUser.getUser_phone().equals(phoneUser)) {
+        for (DeleteConversationUser deleteConversationUser : deleteConversationUsers) {
+            if (deleteConversationUser.getUser_phone().equals(phoneUser)) {
                 result = true;
             } else result = false;
         }
@@ -183,7 +184,7 @@ public class ConversationServiceImpl implements ConversationService {
 
         List<DeleteConversationUser> deleteConversationUserList = conversation.getDeleteConversationUsers();
 
-        if(deleteConversationUserList.isEmpty()) {
+        if (deleteConversationUserList.isEmpty()) {
             List<Message> messages = chatService.getListMessageAfterDeleteConversation(conversation, currentPhone);
             conversation.setMessages(messages);
             return ConversationResponse.builder()
@@ -191,7 +192,7 @@ public class ConversationServiceImpl implements ConversationService {
                     .memberDetails(memberList)
                     .build();
 
-        } else if(checkContainDeleteConversationUser(deleteConversationUserList, currentPhone)) {
+        } else if (checkContainDeleteConversationUser(deleteConversationUserList, currentPhone)) {
             List<Message> messages = chatService.getListMessageAfterDeleteConversation(conversation, currentPhone);
             conversation.setMessages(messages);
 
@@ -218,14 +219,14 @@ public class ConversationServiceImpl implements ConversationService {
         ConversationResponse conversationResponse = new ConversationResponse();
         List<User> memberList = new ArrayList<>();
 
-        QuerySnapshot documentSnapshot =  collectionReference
+        QuerySnapshot documentSnapshot = collectionReference
                 .whereArrayContainsAny("members", members)
                 .get()
                 .get();
-        if(!documentSnapshot.getDocuments().isEmpty()) {
-            for(QueryDocumentSnapshot document : documentSnapshot) {
+        if (!documentSnapshot.getDocuments().isEmpty()) {
+            for (QueryDocumentSnapshot document : documentSnapshot) {
                 Conversation conversationTemp = document.toObject(Conversation.class);
-                if(conversationTemp.getMembers().size() == 2 && conversationTemp.getMembers().containsAll(members)) {
+                if (conversationTemp.getMembers().size() == 2 && conversationTemp.getMembers().containsAll(members)) {
                     List<DeleteConversationUser> deleteConversationUserList = conversationTemp.getDeleteConversationUsers();
 
                     members.forEach(phone -> {
@@ -237,7 +238,7 @@ public class ConversationServiceImpl implements ConversationService {
                         }
                     });
 
-                    if(deleteConversationUserList.isEmpty()) {
+                    if (deleteConversationUserList.isEmpty()) {
                         List<Message> messages = chatService.getListMessageAfterDeleteConversation(conversationTemp, currentPhone);
                         conversationTemp.setMessages(messages);
                         return ConversationResponse.builder()
@@ -245,7 +246,7 @@ public class ConversationServiceImpl implements ConversationService {
                                 .memberDetails(memberList)
                                 .build();
 
-                    } else if(checkContainDeleteConversationUser(deleteConversationUserList, currentPhone)) {
+                    } else if (checkContainDeleteConversationUser(deleteConversationUserList, currentPhone)) {
                         List<Message> messages = chatService.getListMessageAfterDeleteConversation(conversationTemp, currentPhone);
                         conversationTemp.setMessages(messages);
 
@@ -288,12 +289,12 @@ public class ConversationServiceImpl implements ConversationService {
                 .deleted_at(deleted_at)
                 .build();
 
-        if(!conversation.getDeleteConversationUsers().isEmpty()) {
-            if(!deleteConversationUserPhone.contains(currentPhone)) {
+        if (!conversation.getDeleteConversationUsers().isEmpty()) {
+            if (!deleteConversationUserPhone.contains(currentPhone)) {
                 conversation.getDeleteConversationUsers().add(deleteConversationUser);
             } else {
                 for (DeleteConversationUser conversationUser : conversation.getDeleteConversationUsers()) {
-                    if(conversationUser.getUser_phone().equals(currentPhone)) {
+                    if (conversationUser.getUser_phone().equals(currentPhone)) {
                         conversationUser.setDeleted_at(deleteConversationUser.getDeleted_at());
                     }
                 }
@@ -304,4 +305,59 @@ public class ConversationServiceImpl implements ConversationService {
         collectionReference.document(conversationId).set(conversation);
     }
 
+    @Override
+    public void updateGroupChatDetail(Conversation conversation) throws ExecutionException, InterruptedException {
+        if (conversation.getTitle() != null) {
+            db.collection(COLLECTION_NAME)
+                    .document(conversation.getConversation_id())
+                    .update("title", conversation.getTitle());
+        }
+
+        if (conversation.getAva_conversation_url() != null) {
+            db.collection(COLLECTION_NAME)
+                    .document(conversation.getConversation_id())
+                    .update("ava_conversation_url", conversation.getAva_conversation_url());
+        }
+
+        String message_id = UUID.randomUUID().toString();
+        List<String> phoneDeleteList = new ArrayList<>();
+        List<String> images = new ArrayList<>();
+        List<Attach> attaches = new ArrayList<>();
+        MessageRequest messageRequest = new MessageRequest();
+
+        User keyUser = userService.getUserDetailsByPhone(conversation.getCreator_phone()).get();
+
+        if(conversation.getTitle() != null) {
+
+            messageRequest = MessageRequest
+                                .builder()
+                                .conversation_id(conversation.getConversation_id())
+                                .message_id(message_id)
+                                .is_read(false)
+                                .phoneDeleteList(phoneDeleteList)
+                                .images(images)
+                                .sent_date_time(Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant()))
+                                .attaches(attaches)
+                                .is_notification(true)
+                                .content(keyUser.getName() + "đã cập nhật tên nhóm là " + conversation.getTitle())
+                                .build();
+        } else if (conversation.getAva_conversation_url() != null){
+            messageRequest = MessageRequest
+                    .builder()
+                    .conversation_id(conversation.getConversation_id())
+                    .message_id(message_id)
+                    .is_read(false)
+                    .phoneDeleteList(phoneDeleteList)
+                    .images(images)
+                    .sent_date_time(Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant()))
+                    .attaches(attaches)
+                    .is_notification(true)
+                    .content(keyUser.getName() + "đã cập nhật ảnh đại diện nhóm")
+                    .build();
+        }
+
+
+
+        chatService.saveMessage(messageRequest);
+    }
 }
