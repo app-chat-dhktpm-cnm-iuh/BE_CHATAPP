@@ -33,30 +33,67 @@ public class ChatServiceImpl implements ChatService {
     public Message saveMessage(MessageRequest messageRequest) throws ExecutionException, InterruptedException {
         CollectionReference collectionReference = db.collection(COLLECTION_NAME);
         ConversationResponse conversationResponse = conversationService.getConversationById(messageRequest.getConversation_id());
-        List<String> deleteMessageUsers = new ArrayList<>();
 
-        UUID message_id = UUID.randomUUID();
+        if(conversationResponse.getConversation() != null) {
+            List<String> deleteMessageUsers = new ArrayList<>();
 
-        Message message = Message.builder()
-                .message_id(message_id.toString())
-                .sender_name(messageRequest.getSender_name())
-                .sender_phone(messageRequest.getSender_phone())
-                .is_read(messageRequest.is_read())
-                .images(messageRequest.getImages())
-                .attaches(messageRequest.getAttaches())
-                .content(messageRequest.getContent())
-                .sender_avatar_url(messageRequest.getSender_avatar_url())
-                .phoneDeleteList(deleteMessageUsers)
-                .sent_date_time(messageRequest.getSent_date_time())
-                .build();
+            UUID message_id = UUID.randomUUID();
 
+            Message message = Message.builder()
+                    .message_id(message_id.toString())
+                    .sender_name(messageRequest.getSender_name())
+                    .sender_phone(messageRequest.getSender_phone())
+                    .is_read(messageRequest.is_read())
+                    .images(messageRequest.getImages())
+                    .attaches(messageRequest.getAttaches())
+                    .content(messageRequest.getContent())
+                    .sender_avatar_url(messageRequest.getSender_avatar_url())
+                    .phoneDeleteList(deleteMessageUsers)
+                    .sent_date_time(messageRequest.getSent_date_time())
+                    .build();
 
+            conversationResponse.getConversation().getMessages().add(message);
+            conversationResponse.getConversation().setUpdated_at(messageRequest.getSent_date_time());
 
-        conversationResponse.getConversation().getMessages().add(message);
-        conversationResponse.getConversation().setUpdated_at(messageRequest.getSent_date_time());
+            collectionReference.document(messageRequest.getConversation_id()).set(conversationResponse.getConversation());
+            return message;
+        } else {
+            List<String> deleteMessageUsers = new ArrayList<>();
+            List<DeleteConversationUser> deleteConversationUsers = new ArrayList<>();
+            UUID message_id = UUID.randomUUID();
+            List<Message> messages = new ArrayList<>();
 
-        collectionReference.document(messageRequest.getConversation_id()).set(conversationResponse.getConversation());
-        return message;
+            Message message = Message.builder()
+                    .message_id(message_id.toString())
+                    .sender_name(messageRequest.getSender_name())
+                    .sender_phone(messageRequest.getSender_phone())
+                    .is_read(messageRequest.is_read())
+                    .images(messageRequest.getImages())
+                    .attaches(messageRequest.getAttaches())
+                    .content(messageRequest.getContent())
+                    .sender_avatar_url(messageRequest.getSender_avatar_url())
+                    .phoneDeleteList(deleteMessageUsers)
+                    .sent_date_time(messageRequest.getSent_date_time())
+                    .build();
+            messages.add(message);
+            Conversation conversation = Conversation
+                    .builder()
+                    .conversation_id(messageRequest.getConversation_id())
+                    .title("")
+                    .messages(messages)
+                    .is_group(false)
+                    .updated_at(messageRequest.getSent_date_time())
+                    .deleteConversationUsers(deleteConversationUsers)
+                    .creator_phone(messageRequest.getSender_phone())
+                    .ava_conversation_url("")
+                    .members(messageRequest.getMembers())
+                    .build();
+
+            conversationService.addConversation(conversation);
+
+            return message;
+        }
+
     }
 
     @Override

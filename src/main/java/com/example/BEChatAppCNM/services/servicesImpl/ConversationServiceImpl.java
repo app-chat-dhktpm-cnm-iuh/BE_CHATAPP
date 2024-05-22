@@ -32,45 +32,70 @@ public class ConversationServiceImpl implements ConversationService {
     @Override
     public ConversationResponse addConversation(Conversation conversation) {
         CollectionReference collectionReference = db.collection(COLLECTION_NAME);
-        String documentId = collectionReference.document().getId();
+        if(conversation.getConversation_id() == null) {
+            String documentId = collectionReference.document().getId();
 
-        List<User> userList = new ArrayList<>();
+            List<User> userList = new ArrayList<>();
 
-        UUID messageId = UUID.randomUUID();
-        List<String> phoneDeleteList = new ArrayList<>();
-        List<String> images = new ArrayList<>();
-        List<Attach> attaches = new ArrayList<>();
+            UUID messageId = UUID.randomUUID();
+            List<String> phoneDeleteList = new ArrayList<>();
+            List<String> images = new ArrayList<>();
+            List<Attach> attaches = new ArrayList<>();
 
-        Message message = Message
-                .builder()
-                .message_id(messageId.toString())
-                .phoneDeleteList(phoneDeleteList)
-                .images(images)
-                .sent_date_time(Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant()))
-                .attaches(attaches)
-                .is_notification(true)
-                .content("Hãy trò chuyện vui vẻ nào")
-                .build();
+            Message message = Message
+                    .builder()
+                    .message_id(messageId.toString())
+                    .phoneDeleteList(phoneDeleteList)
+                    .images(images)
+                    .sent_date_time(Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant()))
+                    .attaches(attaches)
+                    .is_notification(true)
+                    .content("Hãy trò chuyện vui vẻ nào")
+                    .build();
 
-        conversation.setConversation_id(documentId);
-        conversation.getMessages().add(message);
+            conversation.setConversation_id(documentId);
+            conversation.getMessages().add(message);
 
-        collectionReference.document(documentId).create(conversation);
+            collectionReference.document(documentId).create(conversation);
 
-        conversation.getMembers().forEach(phone -> {
+            conversation.getMembers().forEach(phone -> {
+                try {
+                    Optional<User> user = userService.getUserDetailsByPhone(phone);
+                    userList.add(user.get());
+                } catch (ExecutionException | InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+
+            return ConversationResponse
+                    .builder()
+                    .conversation(conversation)
+                    .memberDetails(userList)
+                    .build();
+        } else {
+            String documentId = conversation.getConversation_id();
+
+            List<User> userList = new ArrayList<>();
+
+            collectionReference.document(documentId).create(conversation);
+
+            conversation.getMembers().forEach(phone -> {
+                try {
+                    Optional<User> user = userService.getUserDetailsByPhone(phone);
+                    userList.add(user.get());
+                } catch (ExecutionException | InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            ConversationResponse conversationResponse = new ConversationResponse();
             try {
-                Optional<User> user = userService.getUserDetailsByPhone(phone);
-                userList.add(user.get());
-            } catch (ExecutionException | InterruptedException e) {
+                conversationResponse = getConversationById(conversation.getConversation_id());
+            }  catch (ExecutionException | InterruptedException e) {
                 throw new RuntimeException(e);
             }
-        });
 
-        return ConversationResponse
-                .builder()
-                .conversation(conversation)
-                .memberDetails(userList)
-                .build();
+            return conversationResponse;
+        }
     }
 
     @Override
