@@ -1,19 +1,19 @@
 package com.example.BEChatAppCNM.services.servicesImpl;
 
-import com.example.BEChatAppCNM.entities.Conversation;
-import com.example.BEChatAppCNM.entities.DeleteConversationUser;
-import com.example.BEChatAppCNM.entities.Message;
-import com.example.BEChatAppCNM.entities.User;
+import com.example.BEChatAppCNM.entities.*;
 import com.example.BEChatAppCNM.entities.dto.ConversationResponse;
 import com.example.BEChatAppCNM.entities.dto.MessageRequest;
 import com.example.BEChatAppCNM.services.ChatService;
 import com.example.BEChatAppCNM.services.ConversationService;
+import com.example.BEChatAppCNM.services.UserService;
 import com.google.cloud.firestore.CollectionReference;
 import com.google.cloud.firestore.Firestore;
 import com.google.firebase.cloud.FirestoreClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -28,6 +28,9 @@ public class ChatServiceImpl implements ChatService {
 
     @Autowired
     private ConversationService conversationService;
+
+    @Autowired
+    private UserService userService;
 
     @Override
     public Message saveMessage(MessageRequest messageRequest) throws ExecutionException, InterruptedException {
@@ -117,47 +120,86 @@ public class ChatServiceImpl implements ChatService {
     public ConversationResponse addMemberToGroupChat(String conversationId, String memPhone, String keyPhone) throws ExecutionException, InterruptedException {
         CollectionReference collectionReference = db.collection(COLLECTION_NAME);
         ConversationResponse conversationResult = conversationService.getConversationById(conversationId);
-        Conversation conversation = conversationResult.getConversation();
-        List<User> listMember = new ArrayList<>();
 
-        if(!keyPhone.equals(conversation.getCreator_phone())) {
-            return null;
-        } else {
-            conversation.getMembers().add(memPhone);
-            collectionReference.document(conversationId).set(conversation);
+        conversationResult.getConversation().getMembers().add(memPhone);
+        List<String> deleteMessageUsers = new ArrayList<>();
 
-            for (User user : conversationResult.getMemberDetails()) {
-                if(user.getPhone().equals(memPhone)) {
-                    listMember.add(user);
-                    conversationResult.setMemberDetails(listMember);
-                    conversationResult.setConversation(conversation);
-                }
-            }
+        UUID message_id = UUID.randomUUID();
 
-            return conversationResult;
-        }
+        List<String> images = new ArrayList<>();
+
+        List<Attach> attaches = new ArrayList<>();
+
+        User keyMem = userService.getUserDetailsByPhone(keyPhone).get();
+        User addedMem = userService.getUserDetailsByPhone(memPhone).get();
+
+        String content = keyMem.getName() + " đã thêm " + addedMem.getName() + " vào nhóm";
+
+        Date sent_date_time = Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant());
+
+
+        Message message = Message.builder()
+                .message_id(message_id.toString())
+                .is_read(false)
+                .images(images)
+                .attaches(attaches)
+                .content(content)
+                .phoneDeleteList(deleteMessageUsers)
+                .sent_date_time(sent_date_time)
+                .build();
+
+        conversationResult.getConversation().getMessages().add(message);
+        conversationResult.getConversation().setUpdated_at(sent_date_time);
+
+        collectionReference.document(conversationId).set(conversationResult.getConversation());
+        conversationResult.getMemberDetails().add(addedMem);
+
+        return conversationResult;
+
     }
 
     @Override
     public ConversationResponse deleteMemberFromGroupChat(String conversationId, String memPhone, String keyPhone) throws ExecutionException, InterruptedException {
         CollectionReference collectionReference = db.collection(COLLECTION_NAME);
         ConversationResponse conversationResult = conversationService.getConversationById(conversationId);
-        Conversation conversation = conversationResult.getConversation();
-        List<User> listMember = new ArrayList<>();
 
-        if(!keyPhone.equals(conversation.getCreator_phone())) {
+        if(!keyPhone.equals(conversationResult.getConversation().getCreator_phone())) {
             return null;
         } else {
-            conversation.getMembers().remove(memPhone);
-            collectionReference.document(conversationId).set(conversation);
 
-            for (User user : conversationResult.getMemberDetails()) {
-                if(user.getPhone().equals(memPhone)) {
-                    listMember.add(user);
-                    conversationResult.setMemberDetails(listMember);
-                    conversationResult.setConversation(conversation);
-                }
-            }
+            List<String> deleteMessageUsers = new ArrayList<>();
+
+            UUID message_id = UUID.randomUUID();
+
+            List<String> images = new ArrayList<>();
+
+            List<Attach> attaches = new ArrayList<>();
+
+            User keyMem = userService.getUserDetailsByPhone(keyPhone).get();
+            User deletedMem = userService.getUserDetailsByPhone(memPhone).get();
+
+            String content = keyMem.getName() + " đã xóa " + deletedMem.getName() + " ra khỏi nhóm";
+
+            Date sent_date_time = Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant());
+
+            Message message = Message.builder()
+                    .message_id(message_id.toString())
+                    .is_read(false)
+                    .images(images)
+                    .attaches(attaches)
+                    .content(content)
+                    .phoneDeleteList(deleteMessageUsers)
+                    .sent_date_time(sent_date_time)
+                    .build();
+
+            conversationResult.getConversation().getMembers().remove(memPhone);
+            conversationResult.getConversation().getMessages().add(message);
+            conversationResult.getConversation().setUpdated_at(sent_date_time);
+
+
+            collectionReference.document(conversationId).set(conversationResult.getConversation());
+
+            conversationResult.getMemberDetails().remove(deletedMem);
 
             return conversationResult;
         }

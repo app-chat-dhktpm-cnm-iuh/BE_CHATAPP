@@ -4,20 +4,19 @@ import com.example.BEChatAppCNM.entities.Conversation;
 import com.example.BEChatAppCNM.entities.Message;
 import com.example.BEChatAppCNM.entities.User;
 import com.example.BEChatAppCNM.entities.dto.ConversationResponse;
+import com.example.BEChatAppCNM.entities.dto.ManageConversationResponse;
 import com.example.BEChatAppCNM.entities.dto.MessageRequest;
 import com.example.BEChatAppCNM.services.ChatService;
 import com.example.BEChatAppCNM.services.ConversationService;
+import com.example.BEChatAppCNM.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -27,6 +26,8 @@ public class ChatController {
     private final ConversationService conversationService;
 
     private final ChatService chatService;
+
+    private final UserService userService;
 
     private final SimpMessagingTemplate messagingTemplate;
 
@@ -140,13 +141,43 @@ public class ChatController {
     @PostMapping("user/add-member/{keyPhone}/{memPhone}/{conversationId}")
     public ResponseEntity addMemberToChatGroup(@PathVariable String keyPhone, @PathVariable String memPhone, @PathVariable String conversationId) throws ExecutionException, InterruptedException {
         ConversationResponse conversationResponse = chatService.addMemberToGroupChat(conversationId, memPhone, keyPhone);
-        if(conversationResponse == null) {
-            return new ResponseEntity<>("Không phải là trưởng nhóm nên không có quyền quản lí nhóm", HttpStatus.UNAUTHORIZED);
-        }
-        conversationResponse.getConversation().getMembers().forEach(member -> {
-            messagingTemplate.convertAndSendToUser(member, "queue/notifyGroupchat", conversationResponse);
+
+        ManageConversationResponse manageConversationResponse = ManageConversationResponse
+                .builder()
+                .conversationId(conversationId)
+                .is_deleted(false)
+                .build();
+
+        List<String> members = conversationResponse.getConversation().getMembers();
+
+        List<Message> messages = conversationResponse.getConversation().getMessages();
+
+        Message message = messages.get(messages.size() - 1);
+
+        MessageRequest messageReturn = MessageRequest.builder()
+                .conversation_id(conversationId)
+                .message_id(message.getMessage_id())
+                .sender_name(message.getSender_name())
+                .sender_phone(message.getSender_phone())
+                .is_read(message.is_read())
+                .members(conversationResponse.getConversation().getMembers())
+                .images(message.getImages())
+                .attaches(message.getAttaches())
+                .content(message.getContent())
+                .sender_avatar_url(message.getSender_avatar_url())
+                .phoneDeleteList(message.getPhoneDeleteList())
+                .sent_date_time(message.getSent_date_time())
+                .build();
+
+        members.forEach(member -> {
+            messagingTemplate.convertAndSendToUser(member, "queue/notifyGroupchat", manageConversationResponse);
         });
-        return new ResponseEntity(conversationResponse, HttpStatus.OK);
+
+        members.forEach(member_phone -> {
+            messagingTemplate.convertAndSendToUser(member_phone, "/queue/messages", messageReturn);
+        });
+
+        return new ResponseEntity(manageConversationResponse, HttpStatus.OK);
     }
 
     @PostMapping("user/delete-member/{keyPhone}/{memPhone}/{conversationId}")
@@ -155,9 +186,46 @@ public class ChatController {
         if(conversationResponse == null) {
             return new ResponseEntity<>("Không phải là trưởng nhóm nên không có quyền quản lí nhóm", HttpStatus.UNAUTHORIZED);
         }
-        conversationResponse.getConversation().getMembers().forEach(member -> {
-            messagingTemplate.convertAndSendToUser(member, "queue/notifyGroupchat", conversationResponse);
+        User deletedUser = userService.getUserDetailsByPhone(memPhone).get();
+
+        List<String> members = conversationResponse.getConversation().getMembers();
+
+        ManageConversationResponse manageConversationResponse = ManageConversationResponse
+                .builder()
+                .conversationId(conversationId)
+                .deletedUser(deletedUser)
+                .is_deleted(true)
+                .build();
+
+        List<Message> messages = conversationResponse.getConversation().getMessages();
+
+        Message message = messages.get(messages.size() - 1);
+
+        MessageRequest messageReturn = MessageRequest.builder()
+                .conversation_id(conversationId)
+                .message_id(message.getMessage_id())
+                .sender_name(message.getSender_name())
+                .sender_phone(message.getSender_phone())
+                .is_read(message.is_read())
+                .members(conversationResponse.getConversation().getMembers())
+                .images(message.getImages())
+                .attaches(message.getAttaches())
+                .content(message.getContent())
+                .sender_avatar_url(message.getSender_avatar_url())
+                .phoneDeleteList(message.getPhoneDeleteList())
+                .sent_date_time(message.getSent_date_time())
+                .build();
+
+        members.forEach(member_phone -> {
+            messagingTemplate.convertAndSendToUser(member_phone, "/queue/messages", messageReturn);
         });
+
+        members.forEach(member -> {
+            messagingTemplate.convertAndSendToUser(member, "queue/notifyGroupchat", manageConversationResponse);
+        });
+
+        messagingTemplate.convertAndSendToUser(memPhone, "queue/notifyGroupchat", manageConversationResponse);
+
         return new ResponseEntity(conversationResponse, HttpStatus.OK);
     }
 
@@ -167,8 +235,15 @@ public class ChatController {
         if(conversationResponse == null) {
             return new ResponseEntity<>("Không phải là trưởng nhóm nên không có quyền quản lí nhóm", HttpStatus.UNAUTHORIZED);
         }
+
+        ManageConversationResponse manageConversationResponse = ManageConversationResponse
+                .builder()
+                .conversationId(conversationId)
+                .is_deleted(true)
+                .build();
+
         conversationResponse.getMembers().forEach(member -> {
-            messagingTemplate.convertAndSendToUser(member, "queue/notifyGroupchat", conversationResponse.getConversation_id());
+            messagingTemplate.convertAndSendToUser(member, "queue/notifyGroupchat", manageConversationResponse);
         });
         return new ResponseEntity(conversationResponse, HttpStatus.OK);
     }
