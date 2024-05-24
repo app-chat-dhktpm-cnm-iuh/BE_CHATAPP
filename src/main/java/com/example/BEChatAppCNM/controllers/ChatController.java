@@ -82,8 +82,7 @@ public class ChatController {
         } else return new ResponseEntity<>("Không tìm thấy hội thoại nào", HttpStatus.NOT_FOUND);
     }
 
-//    @MessageMapping("/chat")
-    @PostMapping("user/createConversation")
+    @MessageMapping("/chat")
     public MessageRequest saveMessage(@RequestBody MessageRequest messageRequest) throws ExecutionException, InterruptedException {
         Message message = chatService.saveMessage(messageRequest);
 
