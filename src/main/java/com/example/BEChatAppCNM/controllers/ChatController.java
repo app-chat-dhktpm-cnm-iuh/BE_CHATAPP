@@ -51,7 +51,7 @@ public class ChatController {
         ConversationResponse conversationResponse = conversationService.getConversationById(conversation.getConversation_id());
 
         conversationResponse.getConversation().getMembers().forEach((memberPhone) -> {
-            messagingTemplate.convertAndSendToUser(memberPhone, "queue/notifyGroupchat", conversationResponse);
+            messagingTemplate.convertAndSendToUser(memberPhone, "queue/updateGroupchat", conversationResponse);
         });
 
         return  conversationResponse;
