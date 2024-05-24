@@ -39,8 +39,8 @@ public class ConversationServiceImpl implements ConversationService {
         List<Attach> attaches = new ArrayList<>();
         Date sentDateTime = Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant());
 
-        if(conversation.getConversation_id() == null && !conversation.is_group()) {
-            String documentId = collectionReference.document().getId();
+        if(conversation.getConversation_id() != null && !conversation.is_group()) {
+            String documentId = conversation.getConversation_id();
 
             List<User> userList = new ArrayList<>();
 
@@ -52,14 +52,11 @@ public class ConversationServiceImpl implements ConversationService {
                     .sent_date_time(sentDateTime)
                     .attaches(attaches)
                     .is_notification(true)
-                    .content("Hãy trò chuyện vui vẻ nào")
+                    .content("Các bạn đã được kết nối")
                     .build();
 
-            List<Message> messages = new ArrayList<>();
-            messages.add(message);
-
             conversation.setConversation_id(documentId);
-            conversation.setMessages(messages);
+            conversation.getMessages().add(message);
             conversation.setUpdated_at(sentDateTime);
             collectionReference.document(documentId).create(conversation);
 
