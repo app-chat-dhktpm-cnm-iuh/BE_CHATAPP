@@ -315,7 +315,8 @@ public class ConversationServiceImpl implements ConversationService {
                     .deleteConversationUsers(deleteConversationUserList)
                     .is_group(false)
                     .build();
-            return addConversation(conversation);
+
+            return createFakeConversation(conversation);
         } else {
             List<DeleteConversationUser> deleteConversationUserList = new ArrayList<>();
             Conversation conversation = Conversation
@@ -324,8 +325,52 @@ public class ConversationServiceImpl implements ConversationService {
                     .deleteConversationUsers(deleteConversationUserList)
                     .is_group(false)
                     .build();
-            return addConversation(conversation);
+            return createFakeConversation(conversation);
         }
+    }
+
+    public ConversationResponse createFakeConversation(Conversation conversation) {
+        UUID messageId = UUID.randomUUID();
+        String documentId = UUID.randomUUID().toString();
+        List<String> phoneDeleteList = new ArrayList<>();
+        List<String> images = new ArrayList<>();
+        List<Attach> attaches = new ArrayList<>();
+        Date sentDateTime = Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant());
+
+        List<User> userList = new ArrayList<>();
+
+        Message message = Message
+                .builder()
+                .message_id(messageId.toString())
+                .phoneDeleteList(phoneDeleteList)
+                .images(images)
+                .sent_date_time(sentDateTime)
+                .attaches(attaches)
+                .is_notification(true)
+                .content("Hãy trò chuyện vui vẻ nào")
+                .build();
+
+        List<Message> messages = new ArrayList<>();
+        messages.add(message);
+
+        conversation.setConversation_id(documentId);
+        conversation.setMessages(messages);
+        conversation.setUpdated_at(sentDateTime);
+
+        conversation.getMembers().forEach(phone -> {
+            try {
+                Optional<User> user = userService.getUserDetailsByPhone(phone);
+                userList.add(user.get());
+            } catch (ExecutionException | InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        return ConversationResponse
+                .builder()
+                .conversation(conversation)
+                .memberDetails(userList)
+                .build();
     }
 
     @Override
