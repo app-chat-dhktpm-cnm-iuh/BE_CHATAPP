@@ -186,24 +186,26 @@ public class ConversationServiceImpl implements ConversationService {
         DocumentReference docRef = db.collection(COLLECTION_NAME).document(conversationId);
         ApiFuture<DocumentSnapshot> future = docRef.get();
         DocumentSnapshot document = future.get();
-        Conversation conversation = document.toObject(Conversation.class);
 
+        if(document.exists()) {
+            Conversation conversation = document.toObject(Conversation.class);
 
-        List<User> meberList = new ArrayList<>();
-        conversation.getMembers().forEach(phone -> {
-            try {
-                Optional<User> user = userService.getUserDetailsByPhone(phone);
-                meberList.add(user.get());
-            } catch (ExecutionException | InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        });
-
-
-        return ConversationResponse
+            List<User> meberList = new ArrayList<>();
+            conversation.getMembers().forEach(phone -> {
+                try {
+                    Optional<User> user = userService.getUserDetailsByPhone(phone);
+                    meberList.add(user.get());
+                } catch (ExecutionException | InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            return ConversationResponse
+                    .builder()
+                    .conversation(conversation)
+                    .memberDetails(meberList)
+                    .build();
+        } else return ConversationResponse
                 .builder()
-                .conversation(conversation)
-                .memberDetails(meberList)
                 .build();
     }
 
