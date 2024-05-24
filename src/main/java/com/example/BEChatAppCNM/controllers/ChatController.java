@@ -71,9 +71,9 @@ public class ChatController {
     public ResponseEntity findConversationByCurrentPhoneAndUserPhone(@PathVariable String currentPhone, @PathVariable String userPhone) throws ExecutionException, InterruptedException {
         ConversationResponse conversationResponse = conversationService.getConversationBySenderPhoneAndReceiverPhone(currentPhone, userPhone);
 
-            if(conversationResponse.getConversation() != null) {
-            return new ResponseEntity<>(conversationResponse, HttpStatus.OK);
-        } return new ResponseEntity<>("Không tìm thấy", HttpStatus.NOT_FOUND);
+//        if (conversationResponse.getConversation() == null)
+//            return new ResponseEntity<>("Không tìm thấy", HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(conversationResponse, HttpStatus.OK);
     }
 
     @CrossOrigin("http://localhost:5173")
@@ -85,8 +85,9 @@ public class ChatController {
         } else return new ResponseEntity<>("Không tìm thấy hội thoại nào", HttpStatus.NOT_FOUND);
     }
 
-    @MessageMapping("/chat")
-    public MessageRequest saveMessage(MessageRequest messageRequest) throws ExecutionException, InterruptedException {
+//    @MessageMapping("/chat")
+    @PostMapping("user/createConversation")
+    public MessageRequest saveMessage(@RequestBody MessageRequest messageRequest) throws ExecutionException, InterruptedException {
         Message message = chatService.saveMessage(messageRequest);
 
         MessageRequest messageReturn = MessageRequest.builder()

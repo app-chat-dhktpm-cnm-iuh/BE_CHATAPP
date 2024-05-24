@@ -32,22 +32,24 @@ public class ConversationServiceImpl implements ConversationService {
     @Override
     public ConversationResponse addConversation(Conversation conversation) {
         CollectionReference collectionReference = db.collection(COLLECTION_NAME);
-        if(conversation.getConversation_id() == null) {
+
+        UUID messageId = UUID.randomUUID();
+        List<String> phoneDeleteList = new ArrayList<>();
+        List<String> images = new ArrayList<>();
+        List<Attach> attaches = new ArrayList<>();
+        Date sentDateTime = Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant());
+
+        if(conversation.getConversation_id() == null && !conversation.is_group()) {
             String documentId = collectionReference.document().getId();
 
             List<User> userList = new ArrayList<>();
-
-            UUID messageId = UUID.randomUUID();
-            List<String> phoneDeleteList = new ArrayList<>();
-            List<String> images = new ArrayList<>();
-            List<Attach> attaches = new ArrayList<>();
 
             Message message = Message
                     .builder()
                     .message_id(messageId.toString())
                     .phoneDeleteList(phoneDeleteList)
                     .images(images)
-                    .sent_date_time(Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant()))
+                    .sent_date_time(sentDateTime)
                     .attaches(attaches)
                     .is_notification(true)
                     .content("Hãy trò chuyện vui vẻ nào")
@@ -58,7 +60,7 @@ public class ConversationServiceImpl implements ConversationService {
 
             conversation.setConversation_id(documentId);
             conversation.setMessages(messages);
-            System.out.println(conversation);
+            conversation.setUpdated_at(sentDateTime);
             collectionReference.document(documentId).create(conversation);
 
             conversation.getMembers().forEach(phone -> {
@@ -76,9 +78,26 @@ public class ConversationServiceImpl implements ConversationService {
                     .memberDetails(userList)
                     .build();
         } else {
-            String documentId = conversation.getConversation_id();
+            String documentId = collectionReference.document().getId();
 
             List<User> userList = new ArrayList<>();
+            Message message = Message
+                    .builder()
+                    .message_id(messageId.toString())
+                    .phoneDeleteList(phoneDeleteList)
+                    .images(images)
+                    .sent_date_time(sentDateTime)
+                    .attaches(attaches)
+                    .is_notification(true)
+                    .content("Hãy trò chuyện vui vẻ nào")
+                    .build();
+
+            List<Message> messages = new ArrayList<>();
+            messages.add(message);
+
+            conversation.setConversation_id(documentId);
+            conversation.setMessages(messages);
+            conversation.setUpdated_at(sentDateTime);
 
             collectionReference.document(documentId).create(conversation);
 
@@ -90,14 +109,12 @@ public class ConversationServiceImpl implements ConversationService {
                     throw new RuntimeException(e);
                 }
             });
-            ConversationResponse conversationResponse = new ConversationResponse();
-            try {
-                conversationResponse = getConversationById(conversation.getConversation_id());
-            }  catch (ExecutionException | InterruptedException e) {
-                throw new RuntimeException(e);
-            }
 
-            return conversationResponse;
+            return ConversationResponse
+                    .builder()
+                    .conversation(conversation)
+                    .memberDetails(userList)
+                    .build();
         }
     }
 
@@ -252,8 +269,9 @@ public class ConversationServiceImpl implements ConversationService {
                 .get()
                 .get();
         if (!documentSnapshot.getDocuments().isEmpty()) {
-            for (QueryDocumentSnapshot document : documentSnapshot) {
+            for (QueryDocumentSnapshot document : documentSnapshot.getDocuments()) {
                 Conversation conversationTemp = document.toObject(Conversation.class);
+                boolean compare = conversationTemp.getMembers().size() == 2 && conversationTemp.getMembers().containsAll(members) && !conversationTemp.is_group();
                 if (conversationTemp.getMembers().size() == 2 && conversationTemp.getMembers().containsAll(members) && !conversationTemp.is_group()) {
                     List<DeleteConversationUser> deleteConversationUserList = conversationTemp.getDeleteConversationUsers();
 
@@ -290,11 +308,24 @@ public class ConversationServiceImpl implements ConversationService {
                     }
                 }
             }
-
+            List<DeleteConversationUser> deleteConversationUserList = new ArrayList<>();
+            Conversation conversation = Conversation
+                    .builder()
+                    .members(members)
+                    .deleteConversationUsers(deleteConversationUserList)
+                    .is_group(false)
+                    .build();
+            return addConversation(conversation);
         } else {
-            return null;
+            List<DeleteConversationUser> deleteConversationUserList = new ArrayList<>();
+            Conversation conversation = Conversation
+                    .builder()
+                    .members(members)
+                    .deleteConversationUsers(deleteConversationUserList)
+                    .is_group(false)
+                    .build();
+            return addConversation(conversation);
         }
-        return conversationResponse;
     }
 
     @Override
