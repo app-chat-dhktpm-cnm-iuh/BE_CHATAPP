@@ -51,7 +51,7 @@ public class ChatController {
         ConversationResponse conversationResponse = conversationService.getConversationById(conversation.getConversation_id());
 
         conversationResponse.getConversation().getMembers().forEach((memberPhone) -> {
-            messagingTemplate.convertAndSendToUser(memberPhone, "queue/updateGroupchat", conversationResponse);
+            messagingTemplate.convertAndSendToUser(memberPhone, "/queue/updateGroupchat", conversationResponse);
         });
 
         return  conversationResponse;
@@ -168,7 +168,7 @@ public class ChatController {
                 .build();
 
         members.forEach(member -> {
-            messagingTemplate.convertAndSendToUser(member, "queue/notifyGroupchat", manageConversationResponse);
+            messagingTemplate.convertAndSendToUser(member, "/queue/notifyGroupchat", manageConversationResponse);
         });
 
         members.forEach(member_phone -> {
@@ -219,10 +219,10 @@ public class ChatController {
         });
 
         members.forEach(member -> {
-            messagingTemplate.convertAndSendToUser(member, "queue/notifyGroupchat", manageConversationResponse);
+            messagingTemplate.convertAndSendToUser(member, "/queue/notifyGroupchat", manageConversationResponse);
         });
 
-        messagingTemplate.convertAndSendToUser(memPhone, "queue/notifyGroupchat", manageConversationResponse);
+        messagingTemplate.convertAndSendToUser(memPhone, "/queue/notifyGroupchat", manageConversationResponse);
 
         return new ResponseEntity(conversationResponse, HttpStatus.OK);
     }
@@ -241,7 +241,7 @@ public class ChatController {
                 .build();
 
         conversationResponse.getMembers().forEach(member -> {
-            messagingTemplate.convertAndSendToUser(member, "queue/notifyGroupchat", manageConversationResponse);
+            messagingTemplate.convertAndSendToUser(member, "/queue/notifyGroupchat", manageConversationResponse);
         });
         return new ResponseEntity(conversationResponse, HttpStatus.OK);
     }
