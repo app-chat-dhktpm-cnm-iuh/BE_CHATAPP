@@ -53,9 +53,12 @@ public class ConversationServiceImpl implements ConversationService {
                     .content("Hãy trò chuyện vui vẻ nào")
                     .build();
 
-            conversation.setConversation_id(documentId);
-            conversation.getMessages().add(message);
+            List<Message> messages = new ArrayList<>();
+            messages.add(message);
 
+            conversation.setConversation_id(documentId);
+            conversation.setMessages(messages);
+            System.out.println(conversation);
             collectionReference.document(documentId).create(conversation);
 
             conversation.getMembers().forEach(phone -> {
@@ -251,7 +254,7 @@ public class ConversationServiceImpl implements ConversationService {
         if (!documentSnapshot.getDocuments().isEmpty()) {
             for (QueryDocumentSnapshot document : documentSnapshot) {
                 Conversation conversationTemp = document.toObject(Conversation.class);
-                if (conversationTemp.getMembers().size() == 2 && conversationTemp.getMembers().containsAll(members)) {
+                if (conversationTemp.getMembers().size() == 2 && conversationTemp.getMembers().containsAll(members) && !conversationTemp.is_group()) {
                     List<DeleteConversationUser> deleteConversationUserList = conversationTemp.getDeleteConversationUsers();
 
                     members.forEach(phone -> {

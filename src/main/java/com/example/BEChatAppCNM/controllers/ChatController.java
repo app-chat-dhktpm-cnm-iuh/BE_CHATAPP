@@ -30,7 +30,7 @@ public class ChatController {
 
     private final SimpMessagingTemplate messagingTemplate;
 
-    @MessageMapping("/user.creatGroupChat")
+    @MessageMapping("/user.createGroupChat")
     public ConversationResponse createGroupChat(Conversation conversation) {
         ConversationResponse conversationResult = conversationService.addConversation(conversation);
 
@@ -42,7 +42,7 @@ public class ChatController {
     }
 
     @PostMapping("user/groupchat/update")
-    public ConversationResponse updateGroupChetDetail(@RequestBody Conversation conversation) throws ExecutionException, InterruptedException {
+    public ConversationResponse updateGroupChatDetail(@RequestBody Conversation conversation) throws ExecutionException, InterruptedException {
         conversationService.updateGroupChatDetail(conversation);
 
         TimeUnit.SECONDS.sleep(2);
@@ -50,7 +50,7 @@ public class ChatController {
         ConversationResponse conversationResponse = conversationService.getConversationById(conversation.getConversation_id());
 
         conversationResponse.getConversation().getMembers().forEach((memberPhone) -> {
-            messagingTemplate.convertAndSendToUser(memberPhone, "queue/notify-groupchat", conversationResponse);
+            messagingTemplate.convertAndSendToUser(memberPhone, "queue/notifyGroupchat", conversationResponse);
         });
 
         return  conversationResponse;
