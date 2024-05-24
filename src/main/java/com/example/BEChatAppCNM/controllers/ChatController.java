@@ -83,7 +83,7 @@ public class ChatController {
     }
 
     @MessageMapping("/chat")
-    public MessageRequest saveMessage(@RequestBody MessageRequest messageRequest) throws ExecutionException, InterruptedException {
+    public MessageRequest saveMessage(MessageRequest messageRequest) throws ExecutionException, InterruptedException {
         Message message = chatService.saveMessage(messageRequest);
 
         MessageRequest messageReturn = MessageRequest.builder()
