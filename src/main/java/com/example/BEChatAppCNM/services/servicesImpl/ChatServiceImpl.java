@@ -79,6 +79,7 @@ public class ChatServiceImpl implements ChatService {
                     .sent_date_time(messageRequest.getSent_date_time())
                     .build();
             messages.add(message);
+
             Conversation conversation = Conversation
                     .builder()
                     .conversation_id(messageRequest.getConversation_id())
