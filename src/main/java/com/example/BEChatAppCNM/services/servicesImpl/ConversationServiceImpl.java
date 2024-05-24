@@ -75,7 +75,7 @@ public class ConversationServiceImpl implements ConversationService {
                     .memberDetails(userList)
                     .build();
         } else {
-            String documentId = conversation.getConversation_id();
+            String documentId = collectionReference.document().getId();
 
             List<User> userList = new ArrayList<>();
             Message message = Message
