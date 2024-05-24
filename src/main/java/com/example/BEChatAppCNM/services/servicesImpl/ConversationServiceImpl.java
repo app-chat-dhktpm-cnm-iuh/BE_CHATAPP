@@ -37,7 +37,8 @@ public class ConversationServiceImpl implements ConversationService {
         List<String> phoneDeleteList = new ArrayList<>();
         List<String> images = new ArrayList<>();
         List<Attach> attaches = new ArrayList<>();
-        Date sentDateTime = Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant());
+        Calendar calendar = Calendar.getInstance();
+        Date sentDateTime = calendar.getTime();;
 
         if(conversation.getConversation_id() != null && !conversation.is_group()) {
             String documentId = conversation.getConversation_id();
