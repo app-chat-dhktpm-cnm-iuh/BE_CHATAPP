@@ -61,15 +61,9 @@ public class FriendController {
     @MessageMapping("/user.replyFriendRequest")
     public  FriendRequest replyFriendRequest(FriendRequest friendRequest) throws ExecutionException, InterruptedException {
         if(friendRequest.isAceppted()) {
-             ConversationResponse conversationResult = userService.addFriend(friendRequest);
-
-             conversationResult.getConversation().getMembers().forEach((memberPhone) -> {
-                messagingTemplate.convertAndSendToUser(memberPhone, "/queue/chat", conversationResult);
-            });
-
+             userService.addFriend(friendRequest);
              messagingTemplate.convertAndSendToUser(friendRequest.getSender_phone(), "/queue/friend-reply", friendRequest);
              messagingTemplate.convertAndSendToUser(friendRequest.getReceiver_phone(), "/queue/friend-reply", friendRequest);
-
              friendService.deleteFriendRequest(friendRequest.getId());
              return friendRequest;
         } else {

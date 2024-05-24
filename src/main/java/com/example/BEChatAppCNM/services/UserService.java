@@ -1,10 +1,8 @@
 package com.example.BEChatAppCNM.services;
 
-import com.example.BEChatAppCNM.entities.dto.ConversationResponse;
 import com.example.BEChatAppCNM.entities.dto.FriendRequest;
 import com.example.BEChatAppCNM.entities.User;
 import com.example.BEChatAppCNM.entities.dto.LoginRegisterResponse;
-import com.google.cloud.firestore.DocumentSnapshot;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,7 +20,7 @@ public interface UserService {
 
     public void updateStatusUser(boolean status, String phone) throws ExecutionException, InterruptedException;
 
-    public ConversationResponse addFriend(FriendRequest friendRequest) throws ExecutionException, InterruptedException;
+    public void addFriend(FriendRequest friendRequest) throws ExecutionException, InterruptedException;
 
     public List<User> getAllUserOnline() throws ExecutionException, InterruptedException;
 

@@ -1,7 +1,6 @@
 package com.example.BEChatAppCNM.services.servicesImpl;
 
 import com.example.BEChatAppCNM.entities.*;
-import com.example.BEChatAppCNM.entities.dto.ConversationResponse;
 import com.example.BEChatAppCNM.entities.dto.FriendRequest;
 import com.example.BEChatAppCNM.entities.dto.LoginRegisterResponse;
 import com.example.BEChatAppCNM.services.ConversationService;
@@ -15,10 +14,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
@@ -126,7 +121,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ConversationResponse addFriend(FriendRequest friendRequest) throws ExecutionException, InterruptedException {
+    public void addFriend(FriendRequest friendRequest) throws ExecutionException, InterruptedException {
         String documentIdSender = getDocumentIdsByPhoneValue(friendRequest.getSender_phone());
         String documentIdReceiver = getDocumentIdsByPhoneValue(friendRequest.getReceiver_phone());
 
@@ -142,54 +137,53 @@ public class UserServiceImpl implements UserService {
 
         db.collection(COLLECTION_USER).document(documentIdSender).update("friends_list", FieldValue.arrayUnion(senderFriend));
         db.collection(COLLECTION_USER).document(documentIdReceiver).update("friends_list", FieldValue.arrayUnion(receiverFriend));
-        return createConversationAfterAddFriend(friendRequest);
     }
 
-    public ConversationResponse createConversationAfterAddFriend(FriendRequest friendRequest) throws ExecutionException, InterruptedException {
-        List<DeleteConversationUser> deleteConversationUsers = new ArrayList<>();
-
-        List<Message> messages = new ArrayList<>();
-
-        CollectionReference collectionReference = db.collection(COLLECTION_CONVERSATION);
-        String conversationId = collectionReference.document().getId();
-
-        List<String> members = new ArrayList<>();
-        members.add(friendRequest.getSender_phone());
-        members.add(friendRequest.getReceiver_phone());
-
-        UUID messageId = UUID.randomUUID();
-        List<String> phoneDeleteList = new ArrayList<>();
-        List<String> images = new ArrayList<>();
-        List<Attach> attaches = new ArrayList<>();
-
-        Message message = Message
-                .builder()
-                .message_id(messageId.toString())
-                .phoneDeleteList(phoneDeleteList)
-                .images(images)
-                .sent_date_time(Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant()))
-                .attaches(attaches)
-                .is_notification(true)
-                .content("Hãy trò chuyện vui vẻ nào")
-                .build();
-
-        messages.add(message);
-
-        Conversation conversation = Conversation
-                .builder()
-                .conversation_id(conversationId)
-                .ava_conversation_url("")
-                .members(members)
-                .title("")
-                .deleteConversationUsers(deleteConversationUsers)
-                .creator_phone(friendRequest.getSender_phone())
-                .is_group(false)
-                .messages(messages)
-                .updated_at(Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant()))
-                .build();
-
-        return conversationService.addConversation(conversation);
-    }
+//    public ConversationResponse createConversationAfterAddFriend(FriendRequest friendRequest) throws ExecutionException, InterruptedException {
+//        List<DeleteConversationUser> deleteConversationUsers = new ArrayList<>();
+//
+//        List<Message> messages = new ArrayList<>();
+//
+//        CollectionReference collectionReference = db.collection(COLLECTION_CONVERSATION);
+//        String conversationId = collectionReference.document().getId();
+//
+//        List<String> members = new ArrayList<>();
+//        members.add(friendRequest.getSender_phone());
+//        members.add(friendRequest.getReceiver_phone());
+//
+//        UUID messageId = UUID.randomUUID();
+//        List<String> phoneDeleteList = new ArrayList<>();
+//        List<String> images = new ArrayList<>();
+//        List<Attach> attaches = new ArrayList<>();
+//
+//        Message message = Message
+//                .builder()
+//                .message_id(messageId.toString())
+//                .phoneDeleteList(phoneDeleteList)
+//                .images(images)
+//                .sent_date_time(Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant()))
+//                .attaches(attaches)
+//                .is_notification(true)
+//                .content("Hãy trò chuyện vui vẻ nào")
+//                .build();
+//
+//        messages.add(message);
+//
+//        Conversation conversation = Conversation
+//                .builder()
+//                .conversation_id(conversationId)
+//                .ava_conversation_url("")
+//                .members(members)
+//                .title("")
+//                .deleteConversationUsers(deleteConversationUsers)
+//                .creator_phone(friendRequest.getSender_phone())
+//                .is_group(false)
+//                .messages(messages)
+//                .updated_at(Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant()))
+//                .build();
+//
+//        return conversationService.addConversation(conversation);
+//    }
 
     @Override
     public List<User> getAllUserOnline() throws ExecutionException, InterruptedException {
