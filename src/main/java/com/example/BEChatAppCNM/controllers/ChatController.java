@@ -240,7 +240,7 @@ public class ChatController {
                 .build();
 
         conversationResponse.getMembers().forEach(member -> {
-            messagingTemplate.convertAndSendToUser(member, "/queue/notifyGroupchat", manageConversationResponse);
+            messagingTemplate.convertAndSendToUser(member, "/queue/disbandGroupchat", manageConversationResponse);
         });
         return new ResponseEntity(conversationResponse, HttpStatus.OK);
     }

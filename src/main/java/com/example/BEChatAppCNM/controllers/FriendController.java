@@ -31,7 +31,7 @@ public class FriendController {
     @CrossOrigin("http://localhost:5173")
     @GetMapping("/user/friends/{currentPhone}")
     public ResponseEntity getFriendListCurrentPhone(@PathVariable String currentPhone) throws ExecutionException, InterruptedException {
-        try {
+                try {
             List<User> userList = userService.getListFriendByPhone(currentPhone);
             if(!userList.isEmpty()) {
                 return new ResponseEntity<>(userList, HttpStatus.OK);
