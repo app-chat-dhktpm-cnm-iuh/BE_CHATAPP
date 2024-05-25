@@ -50,8 +50,33 @@ public class ChatController {
 
         ConversationResponse conversationResponse = conversationService.getConversationById(conversation.getConversation_id());
 
-        conversationResponse.getConversation().getMembers().forEach((memberPhone) -> {
+        List<String> members = conversationResponse.getConversation().getMembers();
+
+        List<Message> messages = conversationResponse.getConversation().getMessages();
+
+        Message message = messages.get(messages.size() - 1);
+
+        MessageRequest messageReturn = MessageRequest.builder()
+                .conversation_id(conversationResponse.getConversation().getConversation_id())
+                .message_id(message.getMessage_id())
+                .sender_name(message.getSender_name())
+                .sender_phone(message.getSender_phone())
+                .is_read(message.is_read())
+                .members(conversationResponse.getConversation().getMembers())
+                .images(message.getImages())
+                .attaches(message.getAttaches())
+                .content(message.getContent())
+                .sender_avatar_url(message.getSender_avatar_url())
+                .phoneDeleteList(message.getPhoneDeleteList())
+                .sent_date_time(message.getSent_date_time())
+                .build();
+
+        members.forEach((memberPhone) -> {
             messagingTemplate.convertAndSendToUser(memberPhone, "/queue/updateGroupchat", conversationResponse);
+        });
+
+        members.forEach(member_phone -> {
+            messagingTemplate.convertAndSendToUser(member_phone, "/queue/messages", messageReturn);
         });
 
         return  conversationResponse;
