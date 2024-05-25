@@ -411,6 +411,10 @@ public class ConversationServiceImpl implements ConversationService {
 
     @Override
     public void updateGroupChatDetail(Conversation conversation) throws ExecutionException, InterruptedException {
+        Calendar calendar = Calendar.getInstance();
+
+        Date sent_date_time = calendar.getTime();
+
         if (conversation.getTitle() != null) {
             db.collection(COLLECTION_NAME)
                     .document(conversation.getConversation_id())
@@ -431,6 +435,8 @@ public class ConversationServiceImpl implements ConversationService {
 
         User keyUser = userService.getUserDetailsByPhone(conversation.getCreator_phone()).get();
 
+
+
         if(conversation.getTitle() != null) {
 
             messageRequest = MessageRequest
@@ -440,7 +446,7 @@ public class ConversationServiceImpl implements ConversationService {
                                 .is_read(false)
                                 .phoneDeleteList(phoneDeleteList)
                                 .images(images)
-                                .sent_date_time(Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant()))
+                                .sent_date_time(sent_date_time)
                                 .attaches(attaches)
                                 .is_notification(true)
                                 .content(keyUser.getName() + "đã cập nhật tên nhóm là " + conversation.getTitle())
@@ -453,7 +459,7 @@ public class ConversationServiceImpl implements ConversationService {
                     .is_read(false)
                     .phoneDeleteList(phoneDeleteList)
                     .images(images)
-                    .sent_date_time(Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant()))
+                    .sent_date_time(sent_date_time)
                     .attaches(attaches)
                     .is_notification(true)
                     .content(keyUser.getName() + "đã cập nhật ảnh đại diện nhóm")
