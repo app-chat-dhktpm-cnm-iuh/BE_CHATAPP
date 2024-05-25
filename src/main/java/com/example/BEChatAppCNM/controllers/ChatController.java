@@ -233,14 +233,8 @@ public class ChatController {
             return new ResponseEntity<>("Không phải là trưởng nhóm nên không có quyền quản lí nhóm", HttpStatus.UNAUTHORIZED);
         }
 
-        ManageConversationResponse manageConversationResponse = ManageConversationResponse
-                .builder()
-                .conversationId(conversationId)
-                .is_deleted(true)
-                .build();
-
         conversationResponse.getMembers().forEach(member -> {
-            messagingTemplate.convertAndSendToUser(member, "/queue/disbandGroupchat", manageConversationResponse);
+            messagingTemplate.convertAndSendToUser(member, "/queue/disbandGroupchat", conversationId);
         });
         return new ResponseEntity(conversationResponse, HttpStatus.OK);
     }
