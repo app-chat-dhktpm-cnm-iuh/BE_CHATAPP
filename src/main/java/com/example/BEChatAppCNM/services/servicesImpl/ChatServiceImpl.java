@@ -14,10 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 @Service
@@ -135,8 +132,8 @@ public class ChatServiceImpl implements ChatService {
         User addedMem = userService.getUserDetailsByPhone(memPhone).get();
 
         String content = keyMem.getName() + " đã thêm " + addedMem.getName() + " vào nhóm";
-
-        Date sent_date_time = Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant());
+        Calendar calendar = Calendar.getInstance();
+        Date sent_date_time = calendar.getTime();
 
 
         Message message = Message.builder()
@@ -181,7 +178,9 @@ public class ChatServiceImpl implements ChatService {
 
             String content = keyMem.getName() + " đã xóa " + deletedMem.getName() + " ra khỏi nhóm";
 
-            Date sent_date_time = Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant());
+            Calendar calendar = Calendar.getInstance();
+
+            Date sent_date_time = calendar.getTime();
 
             Message message = Message.builder()
                     .message_id(message_id.toString())
