@@ -449,7 +449,7 @@ public class ConversationServiceImpl implements ConversationService {
                                 .sent_date_time(sent_date_time)
                                 .attaches(attaches)
                                 .is_notification(true)
-                                .content(keyUser.getName() + "đã cập nhật tên nhóm là " + conversation.getTitle())
+                                .content(keyUser.getName() + " đã cập nhật tên nhóm là " + conversation.getTitle())
                                 .build();
         } else if (conversation.getAva_conversation_url() != null){
             messageRequest = MessageRequest
@@ -462,7 +462,7 @@ public class ConversationServiceImpl implements ConversationService {
                     .sent_date_time(sent_date_time)
                     .attaches(attaches)
                     .is_notification(true)
-                    .content(keyUser.getName() + "đã cập nhật ảnh đại diện nhóm")
+                    .content(keyUser.getName() + " đã cập nhật ảnh đại diện nhóm")
                     .build();
         }
 
