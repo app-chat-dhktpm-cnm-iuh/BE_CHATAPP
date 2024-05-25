@@ -5,6 +5,7 @@ import com.example.BEChatAppCNM.entities.Message;
 import com.example.BEChatAppCNM.entities.dto.ConversationResponse;
 import com.example.BEChatAppCNM.entities.dto.MessageRequest;
 
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 public interface ChatService {
@@ -12,7 +13,7 @@ public interface ChatService {
 
     public void deleteMessage(String conversationId, String messageId, String phoneDelete) throws ExecutionException, InterruptedException;
 
-    public ConversationResponse addMemberToGroupChat(String conversationId, String memPhone, String keyPhone) throws ExecutionException, InterruptedException;
+    public ConversationResponse addMemberToGroupChat(String conversationId, List<String> memPhoneList, String keyPhone) throws ExecutionException, InterruptedException;
 
     public ConversationResponse deleteMemberFromGroupChat(String conversationId, String memPhone, String keyPhone) throws ExecutionException, InterruptedException;
 

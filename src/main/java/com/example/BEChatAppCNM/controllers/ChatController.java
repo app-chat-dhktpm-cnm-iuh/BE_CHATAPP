@@ -161,7 +161,7 @@ public class ChatController {
     }
 
     @PostMapping("user/add-member/{keyPhone}/{memPhone}/{conversationId}")
-    public ResponseEntity addMemberToChatGroup(@PathVariable String keyPhone, @PathVariable String memPhone, @PathVariable String conversationId) throws ExecutionException, InterruptedException {
+    public ResponseEntity addMemberToChatGroup(@PathVariable String keyPhone, @PathVariable List<String> memPhone, @PathVariable String conversationId) throws ExecutionException, InterruptedException {
         ConversationResponse conversationResponse = chatService.addMemberToGroupChat(conversationId, memPhone, keyPhone);
 
         ManageConversationResponse manageConversationResponse = ManageConversationResponse

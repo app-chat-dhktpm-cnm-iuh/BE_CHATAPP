@@ -115,44 +115,74 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public ConversationResponse addMemberToGroupChat(String conversationId, String memPhone, String keyPhone) throws ExecutionException, InterruptedException {
+    public ConversationResponse addMemberToGroupChat(String conversationId, List<String> memPhoneList, String keyPhone) throws ExecutionException, InterruptedException {
         CollectionReference collectionReference = db.collection(COLLECTION_NAME);
         ConversationResponse conversationResult = conversationService.getConversationById(conversationId);
 
-        conversationResult.getConversation().getMembers().add(memPhone);
+        conversationResult.getConversation().getMembers().addAll(memPhoneList);
         List<String> deleteMessageUsers = new ArrayList<>();
 
         UUID message_id = UUID.randomUUID();
 
         List<String> images = new ArrayList<>();
+        User keyMem = userService.getUserDetailsByPhone(keyPhone).get();
 
         List<Attach> attaches = new ArrayList<>();
+        if(memPhoneList.size() == 1) {
+            User addedMem = userService.getUserDetailsByPhone(memPhoneList.get(0)).get();
 
-        User keyMem = userService.getUserDetailsByPhone(keyPhone).get();
-        User addedMem = userService.getUserDetailsByPhone(memPhone).get();
-
-        String content = keyMem.getName() + " đã thêm " + addedMem.getName() + " vào nhóm";
-        Calendar calendar = Calendar.getInstance();
-        Date sent_date_time = calendar.getTime();
+            String content = keyMem.getName() + " đã thêm " + addedMem.getName() + " vào nhóm";
+            Calendar calendar = Calendar.getInstance();
+            Date sent_date_time = calendar.getTime();
 
 
-        Message message = Message.builder()
-                .message_id(message_id.toString())
-                .is_read(false)
-                .images(images)
-                .attaches(attaches)
-                .content(content)
-                .phoneDeleteList(deleteMessageUsers)
-                .sent_date_time(sent_date_time)
-                .build();
+            Message message = Message.builder()
+                    .message_id(message_id.toString())
+                    .is_read(false)
+                    .images(images)
+                    .attaches(attaches)
+                    .content(content)
+                    .phoneDeleteList(deleteMessageUsers)
+                    .sent_date_time(sent_date_time)
+                    .build();
 
-        conversationResult.getConversation().getMessages().add(message);
-        conversationResult.getConversation().setUpdated_at(sent_date_time);
+            conversationResult.getConversation().getMessages().add(message);
+            conversationResult.getConversation().setUpdated_at(sent_date_time);
 
-        collectionReference.document(conversationId).set(conversationResult.getConversation());
-        conversationResult.getMemberDetails().add(addedMem);
+            collectionReference.document(conversationId).set(conversationResult.getConversation());
+            conversationResult.getMemberDetails().add(addedMem);
 
-        return conversationResult;
+            return conversationResult;
+        } else {
+            List<String> nameMembers = new ArrayList<>();
+            for (String memPhone : memPhoneList) {
+                User addedMem = userService.getUserDetailsByPhone(memPhone).get();
+                nameMembers.add(addedMem.getName());
+                conversationResult.getMemberDetails().add(addedMem);
+            }
+
+            String content = keyMem.getName() + " đã thêm " + String.join(nameMembers.toString()) + " vào nhóm";
+            Calendar calendar = Calendar.getInstance();
+            Date sent_date_time = calendar.getTime();
+
+
+            Message message = Message.builder()
+                    .message_id(message_id.toString())
+                    .is_read(false)
+                    .images(images)
+                    .attaches(attaches)
+                    .content(content)
+                    .phoneDeleteList(deleteMessageUsers)
+                    .sent_date_time(sent_date_time)
+                    .build();
+
+            conversationResult.getConversation().getMessages().add(message);
+            conversationResult.getConversation().setUpdated_at(sent_date_time);
+
+            collectionReference.document(conversationId).set(conversationResult.getConversation());
+
+            return conversationResult;
+        }
 
     }
 
